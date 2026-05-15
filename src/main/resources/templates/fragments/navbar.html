@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <body>
 
 <div th:fragment="navbar">
@@ -83,14 +83,24 @@
                                 <li><a class="dropdown-item py-2" th:href="@{/auth/register}"><i class="fa-solid fa-user-plus me-2"></i>Đăng ký</a></li>
                             </th:block>
 
-                            <th:block th:unless="${#authentication == null or #authentication.principal == 'anonymousUser'}">
+                            <th:block sec:authorize="isAuthenticated()">
+                                <li>
+        <span class="dropdown-item-text fw-bold text-primary">
+            Chào, <span sec:authentication="name">Người dùng</span>
+        </span>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+
                                 <li><a class="dropdown-item py-2" th:href="@{/user/profile}"><i class="fa-solid fa-id-card me-2"></i>Hồ sơ của tôi</a></li>
                                 <li><a class="dropdown-item py-2" th:href="@{/user/orders}"><i class="fa-solid fa-box me-2"></i>Đơn hàng</a></li>
                                 <li><hr class="dropdown-divider"></li>
+
                                 <li>
-                                    <a class="dropdown-item py-2 text-danger" th:href="@{/auth/logout}">
-                                        <i class="fa-solid fa-power-off me-2"></i>Đăng xuất
-                                    </a>
+                                    <form th:action="@{/logout}" method="post" id="logoutForm">
+                                        <button type="submit" class="dropdown-item py-2 text-danger border-0 bg-transparent" style="width: 100%; text-align: left;">
+                                            <i class="fa-solid fa-power-off me-2"></i>Đăng xuất
+                                        </button>
+                                    </form>
                                 </li>
                             </th:block>
                         </ul>

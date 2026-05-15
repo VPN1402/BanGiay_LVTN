@@ -26,7 +26,9 @@ public class User {
 
     private Integer status = 1;
 
+
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
+
 }

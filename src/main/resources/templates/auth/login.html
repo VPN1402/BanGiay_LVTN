@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layouts/main-layout}">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/main-layout}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <title>Đăng Nhập - Kicks Store</title>
 </head>
@@ -10,6 +12,10 @@
                 <div class="text-center mb-4">
                     <h3 class="fw-bold text-dark mb-2">Đăng Nhập</h3>
                     <p class="text-muted">Chào mừng bạn trở lại với Kicks Store</p>
+                </div>
+                <div th:if="${successMsg}" class="alert alert-success p-2 small text-center rounded mb-3">
+                    <i class="fa-solid fa-circle-check me-2"></i>
+                    <span th:text="${successMsg}"></span>
                 </div>
 
                 <form th:action="@{/login}" method="post">
@@ -22,10 +28,10 @@
                         <label class="form-label fw-bold small text-muted">Email</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0"><i class="fa-regular fa-envelope"></i></span>
-                            <input type="email" class="form-control border-start-0 bg-light" name="username" placeholder="Nhập email của bạn" required>
+                            <input type="email" class="form-control border-start-0 bg-light" name="email" placeholder="Nhập email của bạn" required>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label class="form-label fw-bold small text-muted">Mật khẩu</label>
                         <div class="input-group">
