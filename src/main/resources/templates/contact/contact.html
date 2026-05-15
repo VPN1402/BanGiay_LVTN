@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layouts/main-layout}"
+      xmlns:layout="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Liên Hệ - Kicks Store</title>
+</head>
+<body>
+    <main layout:fragment="content" class="py-5 bg-white">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 class="fw-bold mb-3">Liên Hệ Với Chúng Tôi</h1>
+            <p class="text-muted w-50 mx-auto">Nếu bạn có bất kỳ câu hỏi nào, xin vui lòng điền vào biểu mẫu dưới đây hoặc liên hệ qua các kênh hỗ trợ của chúng tôi.</p>
+        </div>
+
+        <div class="container pb-5">
+            <div class="row gx-5">
+                <!-- Contact Info -->
+                <div class="col-lg-5 mb-5 mb-lg-0">
+                    <div class="bg-light p-5 rounded-4 h-100">
+                        <h4 class="fw-bold mb-4">Thông Tin Liên Hệ</h4>
+                        
+                        <div class="d-flex align-items-start mb-4">
+                            <div class="bg-primary-custom text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 45px; height: 45px;">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="fw-bold mb-1">Địa chỉ cửa hàng</h6>
+                                <p class="text-muted mb-0">123 Đường Nguyễn Trãi, Quận Thanh Xuân, Thành phố Hà Nội</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start mb-4">
+                            <div class="bg-primary-custom text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 45px; height: 45px;">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="fw-bold mb-1">Hotline Hỗ Trợ</h6>
+                                <p class="text-muted mb-0">0987 654 321 (8:00 - 22:00)</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start mb-5">
+                            <div class="bg-primary-custom text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 45px; height: 45px;">
+                                <i class="fa-regular fa-envelope"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="fw-bold mb-1">Email</h6>
+                                <p class="text-muted mb-0">support@kicksstore.vn</p>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold mb-3">Kết nối với chúng tôi</h6>
+                        <div class="social-icons d-flex gap-2">
+                            <a href="#" class="bg-dark"><i class="fa-brands fa-facebook-f"></i></a>
+                            <a href="#" class="bg-dark"><i class="fa-brands fa-instagram"></i></a>
+                            <a href="#" class="bg-dark"><i class="fa-brands fa-tiktok"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="col-lg-7">
+                    <form th:action="@{/contact/submit}" method="post" class="p-lg-4">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Họ và Tên</label>
+                                <input type="text" class="form-control form-control-lg bg-light border-0" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Email</label>
+                                <input type="email" class="form-control form-control-lg bg-light border-0" name="email" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Chủ đề</label>
+                                <input type="text" class="form-control form-control-lg bg-light border-0" name="subject" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Nội dung tin nhắn</label>
+                                <textarea class="form-control form-control-lg bg-light border-0" name="message" rows="5" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary-custom btn-lg w-100">Gửi Tin Nhắn</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Map Placeholder -->
+            <div class="mt-5 rounded-4 overflow-hidden shadow-sm" style="height: 400px; background: #e9ecef; position: relative;">
+                <div class="position-absolute top-50 start-50 translate-middle text-center">
+                    <i class="fa-solid fa-map-location-dot fs-1 text-muted mb-2"></i>
+                    <h5 class="text-muted">Google Maps UI Integration</h5>
+                    <p class="small text-muted">Nhúng iframe iframe từ Google Maps vào đây</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

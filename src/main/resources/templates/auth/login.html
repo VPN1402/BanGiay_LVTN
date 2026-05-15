@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layouts/main-layout}">
+<head>
+    <title>Đăng Nhập - Kicks Store</title>
+</head>
+<body>
+    <main layout:fragment="content" class="py-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+        <div class="container my-5">
+            <div class="auth-card">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold text-dark mb-2">Đăng Nhập</h3>
+                    <p class="text-muted">Chào mừng bạn trở lại với Kicks Store</p>
+                </div>
+
+                <form th:action="@{/login}" method="post">
+                    <!-- Error Alert -->
+                    <div th:if="${param.error}" class="alert alert-danger p-2 small text-center rounded">
+                        Email hoặc mật khẩu không chính xác!
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-regular fa-envelope"></i></span>
+                            <input type="email" class="form-control border-start-0 bg-light" name="username" placeholder="Nhập email của bạn" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Mật khẩu</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock"></i></span>
+                            <input type="password" class="form-control border-start-0 bg-light" name="password" placeholder="Nhập mật khẩu" required>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me">
+                            <label class="form-check-label small" for="rememberMe">Ghi nhớ đăng nhập</label>
+                        </div>
+                        <a href="#" class="small text-primary-custom text-decoration-none">Quên mật khẩu?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary-custom w-100 mb-3 py-2">Đăng Nhập</button>
+                    
+                    <div class="text-center position-relative my-4">
+                        <hr>
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 small text-muted">Hoặc</span>
+                    </div>
+
+                    <div class="d-flex gap-2 mb-4">
+                        <button type="button" class="btn btn-outline-secondary w-50 py-2"><i class="fa-brands fa-google text-danger me-2"></i> Google</button>
+                        <button type="button" class="btn btn-outline-secondary w-50 py-2"><i class="fa-brands fa-facebook text-primary me-2"></i> Facebook</button>
+                    </div>
+
+                    <p class="text-center small mb-0">
+                        Chưa có tài khoản? <a th:href="@{/auth/register}" class="text-primary-custom fw-bold text-decoration-none">Đăng ký ngay</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

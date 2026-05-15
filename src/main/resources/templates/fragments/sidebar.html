@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="sidebar" class="filter-sidebar bg-white p-3 rounded shadow-sm">
+    <form th:action="@{/product-list}" method="get">
+
+        <div class="filter-group mb-4">
+            <h5 class="filter-title fw-bold small text-uppercase">Tìm Kiếm</h5>
+            <div class="input-group">
+                <input type="text" name="keyword" class="form-control" placeholder="Tên sản phẩm..." th:value="${param.keyword}">
+                <button class="btn btn-outline-secondary" type="submit"><i class="fa-solid fa-search"></i></button>
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <h5 class="filter-title fw-bold small text-uppercase">Danh Mục</h5>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="categories" value="sneaker" id="catSneaker"
+                       th:checked="${param.categories != null and #lists.contains(param.categories, 'sneaker')}">
+                <label class="form-check-label" for="catSneaker">Sneaker</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="categories" value="running" id="catRunning"
+                       th:checked="${param.categories != null and #lists.contains(param.categories, 'running')}">
+                <label class="form-check-label" for="catRunning">Running</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="categories" value="basketball" id="catBasketball"
+                       th:checked="${param.categories != null and #lists.contains(param.categories, 'basketball')}">
+                <label class="form-check-label" for="catBasketball">Basketball</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="categories" value="training" id="catTraining"
+                       th:checked="${param.categories != null and #lists.contains(param.categories, 'training')}">
+                <label class="form-check-label" for="catTraining">Training</label>
+            </div>
+        </div>
+
+        <div class="filter-group mt-4">
+            <h5 class="filter-title fw-bold small text-uppercase">Thương Hiệu</h5>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="brands" value="nike" id="brandNike"
+                       th:checked="${param.brands != null and #lists.contains(param.brands, 'nike')}">
+                <label class="form-check-label" for="brandNike">Nike</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="brands" value="adidas" id="brandAdidas"
+                       th:checked="${param.brands != null and #lists.contains(param.brands, 'adidas')}">
+                <label class="form-check-label" for="brandAdidas">Adidas</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="brands" value="puma" id="brandPuma"
+                       th:checked="${param.brands != null and #lists.contains(param.brands, 'puma')}">
+                <label class="form-check-label" for="brandPuma">Puma</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="brands" value="vans" id="brandVans"
+                       th:checked="${param.brands != null and #lists.contains(param.brands, 'vans')}">
+                <label class="form-check-label" for="brandVans">Vans</label>
+            </div>
+        </div>
+
+        <div class="filter-group mt-4">
+            <h5 class="filter-title fw-bold small text-uppercase">Mức Giá Tối Đa</h5>
+            <input type="range" name="maxPrice" class="form-range" min="0" max="10000000" step="500000" id="priceRange"
+                   th:value="${param.maxPrice != null ? param.maxPrice : 5000000}">
+            <div class="d-flex justify-content-between text-muted small mt-2">
+                <span>0đ</span>
+                <span id="priceDisplay" th:text="${param.maxPrice != null ? #numbers.formatDecimal(param.maxPrice, 0, 'COMMA', 0, 'POINT') + 'đ' : '5.000.000đ'}">5.000.000đ</span>
+            </div>
+        </div>
+
+        <div class="filter-group mt-4">
+            <h5 class="filter-title fw-bold small text-uppercase">Size</h5>
+            <div class="d-flex flex-wrap gap-2 size-selector">
+                <th:block th:each="s : ${#numbers.sequence(39, 43)}">
+                    <input type="checkbox" class="btn-check" name="sizes" th:id="'size' + ${s}" th:value="${s}"
+                           th:checked="${param.sizes != null and #lists.contains(param.sizes, s.toString())}">
+                    <label class="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center"
+                           th:for="'size' + ${s}" style="width: 40px; height: 40px;" th:text="${s}"></label>
+                </th:block>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary-custom w-100 mt-4 fw-bold">Lọc Sản Phẩm</button>
+        <a th:href="@{/product-list}" class="btn btn-link w-100 text-muted small text-decoration-none">Xóa tất cả</a>
+    </form>
+
+<!--    truượt theo thanh giá-->
+    <script>
+        document.getElementById('priceRange')?.addEventListener('input', function() {
+            document.getElementById('priceDisplay').textContent = new Intl.NumberFormat('vi-VN').format(this.value) + 'đ';
+        });
+    </script>
+</div>
+</body>
+</html>

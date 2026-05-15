@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main-layout}">
+<head>
+    <th:block layout:fragment="head">
+        <style>
+            .hero-section {
+                background: url('https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&q=80&w=2000') no-repeat center center;
+                background-size: cover;
+                position: relative;
+            }
+            .hero-section::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.6);
+            }
+        </style>
+        <link rel="stylesheet" th:href="@{/css/style.css}">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </th:block>
+</head>
+<body>
+    <main layout:fragment="content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container hero-content text-center text-md-start">
+                <div class="row">
+                    <div class="col-lg-6 col-md-8">
+                        <span class="badge bg-primary-custom mb-3 py-2 px-3">New Collection 2026</span>
+                        <h1 class="hero-title text-white">STEP INTO<br>GREATNESS</h1>
+                        <p class="hero-subtitle text-light">Khám phá bộ sưu tập giày thể thao mới nhất với thiết kế đột phá, mang lại sự thoải mái tối đa cho mọi chuyển động của bạn.</p>
+                        <div class="d-flex gap-3 justify-content-center justify-content-md-start">
+                            <a th:href="@{/product/list}" class="btn btn-primary-custom btn-lg">Mua Ngay</a>
+                            <a th:href="@{/category/sale}" class="btn btn-outline-light btn-lg px-4" style="border-radius:8px; font-weight:600;">Xem Khuyến Mãi</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories Section -->
+        <section class="py-5 mt-4">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-end mb-4">
+                    <h2 class="mb-0">Danh Mục Nổi Bật</h2>
+                    <a th:href="@{/category}" class="text-primary-custom fw-bold">Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <a th:href="@{/category/running}" class="category-card">
+                            <img th:src="@{/images/category-running.jpg}" alt="Running Shoes">
+                            <div class="category-content">
+                                <h3>Running</h3>
+                                <p class="mb-0 text-white-50">Tối ưu tốc độ</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a th:href="@{/category/sneaker}" class="category-card">
+                            <img th:src="@{/images/category-lifestyle.jpg}" alt="Lifestyle Sneakers">
+                            <div class="category-content">
+                                <h3>Lifestyle</h3>
+                                <p class="mb-0 text-white-50">Phong cách mỗi ngày</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a th:href="@{/category/basketball}" class="category-card">
+                            <img th:src="@{/images/category-basketball.jpg}" alt="Basketball Shoes">
+                            <div class="category-content">
+                                <h3>Basketball</h3>
+                                <p class="mb-0 text-white-50">Làm chủ sân bóng</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Products -->
+        <section class="py-5 bg-white">
+            <div class="container">
+                <h2 class="fw-bold mb-4">Sản Phẩm Mới</h2>
+                <div class="row g-4">
+                    <div class="col-6 col-md-4 col-lg-3" th:each="product : ${products}">
+                        <div class="product-card">
+                            <div class="product-img-wrapper">
+                                <a th:href="@{'/product/detail/' + ${product.id}}">
+                                    <img th:src="${product.thumbnail != '' ? product.thumbnail : 'https://via.placeholder.com/300x300?text=No+Image'}"
+                                         th:alt="${product.name}">
+                                </a>
+                            </div>
+
+                            <div class="product-info">
+                                <div class="product-category-text" th:text="${product.category.name}">Giày Đá Banh</div>
+
+                                <div class="product-brand" th:text="${product.brand.name}">Thương hiệu</div>
+
+                                <a th:href="@{'/product/detail/' + ${product.id}}" class="text-decoration-none">
+                                    <h3 class="product-title" th:text="${product.name}">Tên sản phẩm</h3>
+                                </a>
+
+                                <div class="product-price"
+                                     th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">
+                                    0đ
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
