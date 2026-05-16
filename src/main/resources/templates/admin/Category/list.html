@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layouts/main-layout}">
+
+<head>
+    <title>Quản lý danh mục</title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center pt-3 pb-3 mb-4 border-bottom">
+
+        <div>
+
+            <h1 class="h2 fw-bold mb-1">
+                Quản lý danh mục
+            </h1>
+
+            <p class="text-muted mb-0">
+                Danh sách danh mục sản phẩm
+            </p>
+
+        </div>
+
+        <!-- BUTTON ADD -->
+        <a th:href="@{/admin/category/add}"
+           class="btn btn-primary shadow-sm">
+
+            <i class="bi bi-plus-circle me-1"></i>
+
+            Thêm danh mục
+
+        </a>
+
+    </div>
+
+    <!-- CARD -->
+    <div class="card border-0 shadow rounded-4">
+
+        <div class="card-body p-4">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <!-- TABLE HEAD -->
+                    <thead class="table-light">
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Ảnh</th>
+
+                        <th>Tên danh mục</th>
+
+                        <th>Mô tả</th>
+
+                        <th>Nổi bật</th>
+
+                        <th class="text-center">
+                            Thao tác
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+                    <!-- TABLE BODY -->
+                    <tbody>
+
+                    <!-- LOOP -->
+                    <tr th:each="c : ${categories}">
+
+                        <!-- ID -->
+                        <td class="fw-semibold text-muted"
+                            th:text="${c.id}">
+                        </td>
+
+                        <!-- IMAGE -->
+                        <td>
+
+                            <img th:src="${c.thumbnail != null && !#strings.isEmpty(c.thumbnail)
+                                    ? c.thumbnail
+                                    : 'https://via.placeholder.com/80'}"
+
+                                 alt="category"
+
+                                 class="rounded border"
+
+                                 style="width:70px;
+                                        height:70px;
+                                        object-fit:cover;">
+
+                        </td>
+
+                        <!-- NAME -->
+                        <td>
+
+                            <div class="fw-semibold"
+                                 th:text="${c.name}">
+                            </div>
+
+                        </td>
+
+                        <!-- DESCRIPTION -->
+                        <td>
+
+                            <span class="text-muted"
+                                  th:text="${c.description}">
+                            </span>
+
+                        </td>
+
+                        <!-- FEATURED -->
+                        <td>
+
+                            <span th:if="${c.featured}"
+                                  class="badge bg-success px-3 py-2">
+
+                                Nổi bật
+
+                            </span>
+
+                            <span th:unless="${c.featured}"
+                                  class="badge bg-secondary px-3 py-2">
+
+                                Thường
+
+                            </span>
+
+                        </td>
+
+                        <!-- ACTION -->
+                        <td class="text-center">
+
+                            <div class="btn-group">
+
+                                <!-- EDIT -->
+                                <a th:href="@{'/admin/category/edit/' + ${c.id}}"
+                                   class="btn btn-sm btn-outline-primary">
+
+                                    <i class="bi bi-pencil-square"></i>
+
+                                </a>
+
+                                <!-- DELETE -->
+                                <a th:href="@{'/admin/category/delete/' + ${c.id}}"
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')">
+
+                                    <i class="bi bi-trash"></i>
+
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    <!-- EMPTY -->
+                    <tr th:if="${#lists.isEmpty(categories)}">
+
+                        <td colspan="6"
+                            class="text-center py-5">
+
+                            <div class="text-muted">
+
+                                <i class="bi bi-folder fs-1 d-block mb-3"></i>
+
+                                Chưa có danh mục nào
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

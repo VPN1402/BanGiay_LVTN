@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layouts/main-layout}">
+
+<head>
+    <title th:text="${product.id == null ? 'Thêm sản phẩm' : 'Sửa sản phẩm'}"></title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+
+    <!-- PAGE TITLE -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <div>
+            <h1 class="h2 fw-bold"
+                th:text="${product.id == null ? 'Thêm sản phẩm mới' : 'Cập nhật sản phẩm'}">
+            </h1>
+
+            <p class="text-muted mb-0">
+                Quản lý thông tin sản phẩm trong hệ thống
+            </p>
+        </div>
+    </div>
+
+    <!-- CARD -->
+    <div class="card shadow border-0 rounded-4">
+
+        <div class="card-body p-4">
+
+            <form th:action="@{/admin/product/save}"
+                  th:object="${product}"
+                  method="post">
+
+                <!-- ID -->
+                <input type="hidden" th:field="*{id}"/>
+
+                <!-- TÊN -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        Tên sản phẩm
+                    </label>
+
+                    <input type="text"
+                           th:field="*{name}"
+                           class="form-control form-control-lg"
+                           placeholder="Nhập tên sản phẩm..."
+                           required>
+                </div>
+
+                <!-- ROW -->
+                <div class="row">
+
+                    <!-- GIÁ -->
+                    <div class="col-md-4 mb-4">
+
+                        <label class="form-label fw-semibold">
+                            Giá bán (VNĐ)
+                        </label>
+
+                        <input type="number"
+                               th:field="*{price}"
+                               class="form-control"
+                               placeholder="0"
+                               required>
+                    </div>
+
+                    <div class="col-md-4 mb-4">
+
+                        <label class="form-label fw-semibold">
+                            Thương hiệu
+                        </label>
+
+                        <select th:field="*{brand}"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                -- Chọn thương hiệu --
+                            </option>
+
+                            <option th:each="b : ${brands}"
+                                    th:value="${b.id}"
+                                    th:text="${b.name}">
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- CATEGORY -->
+                    <div class="col-md-4 mb-4">
+
+                        <label class="form-label fw-semibold">
+                            Danh mục
+                        </label>
+
+                        <select th:field="*{category}"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                -- Chọn danh mục --
+                            </option>
+
+                            <option th:each="c : ${categories}"
+                                    th:value="${c.id}"
+                                    th:text="${c.name}">
+                            </option>
+
+                        </select>
+                    </div>
+
+                </div>
+
+                <!-- ẢNH -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Link ảnh sản phẩm
+                    </label>
+
+                    <input type="text"
+                           th:field="*{thumbnail}"
+                           class="form-control"
+                           placeholder="https://example.com/image.jpg">
+
+                </div>
+
+                <!-- PREVIEW IMAGE -->
+                <div class="mb-4 text-center"
+                     th:if="${product.thumbnail != null and !#strings.isEmpty(product.thumbnail)}">
+
+                    <img th:src="${product.thumbnail}"
+                         class="img-fluid rounded shadow-sm border"
+                         style="max-height: 250px;">
+                </div>
+
+                <!-- MÔ TẢ -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Mô tả sản phẩm
+                    </label>
+
+                    <textarea th:field="*{description}"
+                              class="form-control"
+                              rows="5"
+                              placeholder="Nhập mô tả sản phẩm...">
+                    </textarea>
+
+                </div>
+                <!-- FEATURED -->
+                <div class="form-check mb-4">
+
+                    <input class="form-check-input"
+                           type="checkbox"
+                           th:field="*{featured}">
+
+                    <label class="form-check-label fw-semibold">
+
+                        Hiển thị ở danh mục nổi bật
+
+                    </label>
+
+                </div>
+
+                <!-- BUTTON -->
+                <div class="d-flex gap-2 mt-4">
+
+                    <button type="submit"
+                            class="btn btn-primary px-4">
+
+                        <i class="bi bi-save"></i>
+
+                        <span th:text="${product.id == null ? 'Thêm sản phẩm' : 'Cập nhật'}"></span>
+
+                    </button>
+
+                    <a th:href="@{/admin/products}"
+                       class="btn btn-outline-secondary">
+
+                        Quay lại
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

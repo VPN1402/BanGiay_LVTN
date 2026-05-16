@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layouts/main-layout}">
+
+<head>
+    <title th:text="${user.id == null ? 'Thêm người dùng' : 'Sửa người dùng'}"></title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+
+    <!-- TITLE -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+
+        <div>
+
+            <h1 class="h2 fw-bold"
+                th:text="${user.id == null ? 'Thêm người dùng mới' : 'Cập nhật người dùng'}">
+            </h1>
+
+            <p class="text-muted mb-0">
+                Quản lý thông tin tài khoản
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- CARD -->
+    <div class="card shadow border-0 rounded-4">
+
+        <div class="card-body p-4">
+
+            <form th:action="@{/admin/user/save}"
+                  th:object="${user}"
+                  method="post">
+
+                <!-- ID -->
+                <input type="hidden"
+                       th:field="*{id}"/>
+
+                <!-- NAME -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Họ và tên
+                    </label>
+
+                    <input type="text"
+                           th:field="*{fullName}"
+                           class="form-control form-control-lg"
+                           placeholder="Nhập họ tên..."
+                           required>
+
+                </div>
+
+                <!-- EMAIL -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Email
+                    </label>
+
+                    <input type="email"
+                           th:field="*{email}"
+                           class="form-control"
+                           placeholder="example@gmail.com"
+                           required>
+
+                </div>
+
+                <!-- PHONE -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Số điện thoại
+                    </label>
+
+                    <input type="text"
+                           th:field="*{phone}"
+                           class="form-control"
+                           placeholder="0912345678">
+
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Mật khẩu
+                    </label>
+
+                    <input type="password"
+                           th:field="*{password}"
+                           class="form-control"
+                           placeholder="Nhập mật khẩu">
+
+                </div>
+
+                <!-- STATUS -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Trạng thái
+                    </label>
+
+                    <select th:field="*{status}"
+                            class="form-select">
+
+                        <option value="1">
+                            Hoạt động
+                        </option>
+
+                        <option value="0">
+                            Khóa
+                        </option>
+
+                    </select>
+
+                </div>
+                <!-- ROLE -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        Quyền
+                    </label>
+
+                    <select th:field="*{role}"
+                            class="form-select"
+                            required>
+
+                        <option value="">
+                            -- Chọn quyền --
+                        </option>
+
+                        <option th:each="r : ${roles}"
+                                th:value="${r.id}"
+                                th:text="${r.roleName}">
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- BUTTON -->
+                <div class="d-flex gap-2 mt-4">
+
+                    <button type="submit"
+                            class="btn btn-primary px-4">
+
+                        <i class="bi bi-save"></i>
+
+                        <span th:text="${user.id == null ? 'Thêm người dùng' : 'Cập nhật'}"></span>
+
+                    </button>
+
+                    <a th:href="@{/admin/users}"
+                       class="btn btn-outline-secondary">
+
+                        Quay lại
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

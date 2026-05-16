@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layouts/main-layout}">
+<head>
+    <title>Tất Cả Danh Mục - Kicks Store</title>
+</head>
+<body>
+<main layout:fragment="content" class="py-5 bg-light">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Trang Chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Danh Mục</li>
+            </ol>
+        </nav>
+
+        <div class="row g-4">
+
+            <!-- LOOP CATEGORY -->
+            <div class="col-md-4"
+                 th:each="c : ${categories}">
+
+                <a th:href="@{'/category/' + ${c.id}}"
+                   class="category-card">
+
+                    <!-- IMAGE -->
+                    <img th:src="${c.thumbnail != null && !#strings.isEmpty(c.thumbnail)
+                            ? c.thumbnail
+                            : 'https://via.placeholder.com/500x300?text=Category'}"
+                         alt="category">
+
+                    <div class="category-content">
+
+                        <!-- NAME -->
+                        <h3 th:text="${c.name}">
+                            Tên danh mục
+                        </h3>
+
+                        <!-- DESCRIPTION -->
+                        <p class="mb-0 text-white-50"
+                           th:text="${c.description}">
+                            Mô tả
+                        </p>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+            <div class="col-12 text-center py-5" th:if="${#lists.isEmpty(categories)}">
+                <i class="fa-solid fa-box-open fs-1 text-muted mb-3"></i>
+                <p class="text-muted">Không tìm thấy danh mục nào phù hợp.</p>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

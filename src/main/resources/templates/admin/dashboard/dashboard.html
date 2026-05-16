@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layouts/main-layout}">
+
+<head>
+    <title>Dashboard</title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center pt-3 pb-3 mb-4 border-bottom">
+
+        <div>
+
+            <h1 class="h2 fw-bold">
+                Dashboard Admin
+            </h1>
+
+            <p class="text-muted mb-0">
+                Tổng quan hệ thống quản lý shop giày
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- STATS -->
+    <div class="row g-4 mb-4">
+
+        <!-- PRODUCTS -->
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow rounded-4 h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                Sản phẩm
+                            </p>
+
+                            <h2 class="fw-bold"
+                                th:text="${totalProducts}">
+                                0
+                            </h2>
+
+                        </div>
+
+                        <i class="bi bi-box-seam fs-1 text-primary"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- CATEGORY -->
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow rounded-4 h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                Danh mục
+                            </p>
+
+                            <h2 class="fw-bold"
+                                th:text="${totalCategories}">
+                                0
+                            </h2>
+
+                        </div>
+
+                        <i class="bi bi-tags fs-1 text-success"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- USERS -->
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow rounded-4 h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                Người dùng
+                            </p>
+
+                            <h2 class="fw-bold"
+                                th:text="${totalUsers}">
+                                0
+                            </h2>
+
+                        </div>
+
+                        <i class="bi bi-people fs-1 text-danger"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- BRANDS -->
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow rounded-4 h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                Thương hiệu
+                            </p>
+
+                            <h2 class="fw-bold"
+                                th:text="${totalBrands}">
+                                0
+                            </h2>
+
+                        </div>
+
+                        <i class="bi bi-award fs-1 text-warning"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="row g-4">
+
+        <!-- PRODUCT TABLE -->
+        <div class="col-lg-7">
+
+            <div class="card border-0 shadow rounded-4">
+
+                <div class="card-header bg-white border-0 pt-4">
+
+                    <h5 class="fw-bold">
+                        Sản phẩm mới
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="table-responsive">
+
+                        <table class="table align-middle">
+
+                            <thead>
+
+                            <tr>
+
+                                <th>ID</th>
+
+                                <th>Tên sản phẩm</th>
+
+                                <th>Giá</th>
+
+                            </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                            <tr th:each="p : ${products}">
+
+                                <td th:text="${p.id}"></td>
+
+                                <td th:text="${p.name}"></td>
+
+                                <td class="text-danger fw-bold">
+
+                                    <span th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')}"></span> đ
+
+                                </td>
+
+                            </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- USER TABLE -->
+        <div class="col-lg-5">
+
+            <div class="card border-0 shadow rounded-4">
+
+                <div class="card-header bg-white border-0 pt-4">
+
+                    <h5 class="fw-bold">
+                        Người dùng mới
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="table-responsive">
+
+                        <table class="table align-middle">
+
+                            <thead>
+
+                            <tr>
+
+                                <th>ID</th>
+
+                                <th>Họ tên</th>
+
+                                <th>Role</th>
+
+                            </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                            <tr th:each="u : ${users}">
+
+                                <td th:text="${u.id}"></td>
+
+                                <td th:text="${u.fullName}"></td>
+
+                                <td>
+
+                                    <span class="badge bg-primary">
+                                        <span th:text="${u.role != null ? u.role.roleName : 'USER'}"></span>
+                                    </span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

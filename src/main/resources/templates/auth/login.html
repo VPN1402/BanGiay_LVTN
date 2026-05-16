@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      layout:decorate="~{layouts/main-layout}"
+      layout:decorate="~{user/layouts/main-layout}"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <title>Đăng Nhập - Kicks Store</title>
@@ -61,7 +61,7 @@
                     </div>
 
                     <p class="text-center small mb-0">
-                        Chưa có tài khoản? <a th:href="@{/auth/register}" class="text-primary-custom fw-bold text-decoration-none">Đăng ký ngay</a>
+                        Chưa có tài khoản? <a th:href="@{/templates/auth/register}" class="text-primary-custom fw-bold text-decoration-none">Đăng ký ngay</a>
                     </p>
                 </form>
             </div>

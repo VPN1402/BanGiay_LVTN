@@ -1,34 +1,20 @@
 package com.example.LVTN.service;
 
+import com.example.LVTN.entity.Category;
 import com.example.LVTN.entity.Product;
-import com.example.LVTN.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
-public class ProductService {
+public interface ProductService {
 
-    @Autowired
-    private ProductRepository productRepository;
+    List<Product> findAll();
 
-    public List<Product> findAll() {
-        return productRepository.findAll();
-    }
+    Product findById(Long id);
 
-    public Product findById(Long id) {
-        return productRepository.findById(id).orElse(null);
-    }
+    Product save(Product product);
 
-    public Product save(Product product) {
-        return productRepository.save(product);
-    }
-    public List<Product> filterProducts(Long categoryId, Double minPrice, Double maxPrice) {
-        return productRepository.filterProducts(categoryId, minPrice, maxPrice);
-    }
+    void delete(Long id);
 
-    public void delete(Long id) {
-        productRepository.deleteById(id);
-    }
+    List<Product> filterProducts(Long categoryId, Double minPrice, Double maxPrice);
+    List<Product> findFeatured();
 }

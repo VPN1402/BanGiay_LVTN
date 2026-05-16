@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/css/**", "/js/**", "/register").permitAll() // Các trang không cần đăng nhập
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN") // Chỉ admin mới vào được
-                        .anyRequest().authenticated() // Còn lại phải đăng nhập hết
+                        .anyRequest().permitAll()
                 )
                 .formLogin(login -> login
                         .loginPage("/auth/login") // Trang login của bạn

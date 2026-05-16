@@ -1,5 +1,6 @@
 package com.example.LVTN.repository;
 
+import com.example.LVTN.entity.Category;
 import com.example.LVTN.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -7,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
+    List<Product> findByFeaturedTrue();
 
     @Query("SELECT DISTINCT p FROM Product p " +
             "LEFT JOIN p.category c " +

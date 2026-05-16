@@ -26,6 +26,9 @@ public class Product {
 
     private String thumbnail;
 
+    @Column(name = "featured")
+    private Boolean featured = false;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;

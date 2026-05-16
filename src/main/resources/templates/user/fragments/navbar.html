@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<body>
+
+<div th:fragment="navbar">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top py-3">
+        <div class="container">
+
+            <a class="navbar-brand fw-bold fs-3 text-dark" th:href="@{/}">
+                ShoeStore
+            </a>
+
+            <button class="navbar-toggler border-0"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#mainNav"
+                    aria-controls="mainNav"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNav">
+
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${currentUri == '/'} ? 'active' : ''"
+                           th:href="@{/}">
+                            Trang chủ
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${currentUri != null and #strings.contains(currentUri, '/product')} ? 'active' : ''"
+                           th:href="@{/product-list}">
+                            Sản phẩm
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${currentUri != null and #strings.contains(currentUri, '/category')} ? 'active' : ''"
+                           th:href="@{/category}">
+                            Danh Mục
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${currentUri != null and #strings.contains(currentUri, '/contact')} ? 'active' : ''"
+                           th:href="@{/contact}">
+                            Liên hệ
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center justify-content-end">
+
+                    <a href="#" class="nav-link px-3 text-dark" data-bs-toggle="modal" data-bs-target="#searchModal">
+                        <i class="fa-solid fa-magnifying-glass fs-5"></i>
+                    </a>
+
+                    <a th:href="@{#}" class="nav-link px-3 position-relative text-dark">
+                        <i class="fa-solid fa-cart-shopping fs-5"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                              style="font-size: 0.65rem; padding: 0.35em 0.65em; margin-top: 5px; margin-left: -5px;">
+                            0
+                        </span>
+                    </a>
+
+                    <div class="dropdown ms-2">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center text-dark px-2"
+                           href="#"
+                           id="userDropdown"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            <i class="fa-solid fa-circle-user fs-4 me-1"></i>
+                            <span class="d-none d-md-inline small fw-medium">Tài khoản</span>
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm mt-3"
+                            aria-labelledby="userDropdown"
+                            style="border-radius: 12px; min-width: 180px;">
+
+                            <th:block th:if="${#authentication == null or #authentication.principal == 'anonymousUser'}">
+                                <li><a class="dropdown-item py-2" th:href="@{/auth/login}"><i class="fa-solid fa-right-to-bracket me-2"></i>Đăng nhập</a></li>
+                                <li><a class="dropdown-item py-2" th:href="@{/auth/register}"><i class="fa-solid fa-user-plus me-2"></i>Đăng ký</a></li>
+                            </th:block>
+
+                            <th:block sec:authorize="isAuthenticated()">
+                                <li>
+        <span class="dropdown-item-text fw-bold text-primary">
+            Chào, <span sec:authentication="name">Người dùng</span>
+        </span>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+
+                                <li><a class="dropdown-item py-2" th:href="@{/user/profile}"><i class="fa-solid fa-id-card me-2"></i>Hồ sơ của tôi</a></li>
+                                <li><a class="dropdown-item py-2" th:href="@{/user/orders}"><i class="fa-solid fa-box me-2"></i>Đơn hàng</a></li>
+                                <li><hr class="dropdown-divider"></li>
+
+                                <li>
+                                    <form th:action="@{/logout}" method="post" id="logoutForm">
+                                        <button type="submit" class="dropdown-item py-2 text-danger border-0 bg-transparent" style="width: 100%; text-align: left;">
+                                            <i class="fa-solid fa-power-off me-2"></i>Đăng xuất
+                                        </button>
+                                    </form>
+                                </li>
+                            </th:block>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-body p-4">
+                    <form th:action="@{/templates/user/product/search}" method="get" class="d-flex">
+                        <input type="text"
+                               name="keyword"
+                               class="form-control form-control-lg border-0 shadow-none bg-light me-2"
+                               placeholder="Tìm kiếm sản phẩm..."
+                               autofocus>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fa-solid fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
