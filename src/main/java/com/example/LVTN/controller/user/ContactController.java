@@ -13,7 +13,7 @@ public class ContactController {
 
     @GetMapping("/contact")
     public String showContactPage(Model model, HttpServletRequest request) {
-        // Gửi currentUri để navbar nhận biết trang active
+
         model.addAttribute("currentUri", request.getRequestURI());
         return "user/contact/contact.html";
     }
@@ -26,11 +26,11 @@ public class ContactController {
             @RequestParam String message,
             RedirectAttributes redirectAttributes) {
 
-        // Bước này bạn có thể xử lý: Lưu vào DB hoặc gửi Email thực tế
+
         System.out.println("Nhận liên hệ từ: " + name + " (" + email + ")");
         System.out.println("Chủ đề: " + subject);
 
-        // Thông báo cho người dùng sau khi gửi thành công
+
         redirectAttributes.addFlashAttribute("successMsg", "Cảm ơn bạn! Tin nhắn đã được gửi đi thành công.");
 
         return "redirect:/contact";

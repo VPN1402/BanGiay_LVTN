@@ -13,31 +13,31 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Dùng để mã hóa mật khẩu
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Tắt để test local cho dễ
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/css/**", "/js/**", "/register").permitAll() // Các trang không cần đăng nhập
-                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN") // Chỉ admin mới vào được
+                        .requestMatchers("/auth/**", "/css/**", "/js/**", "/register").permitAll()
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().permitAll()
                 )
                 .formLogin(login -> login
-                        .loginPage("/auth/login") // Trang login của bạn
-                        .loginProcessingUrl("/login") // Đường dẫn mà form POST đến
-                        .usernameParameter("email") // Vì bạn đã sửa html thành email
+                        .loginPage("/auth/login")
+                        .loginProcessingUrl("/login")
+                        .usernameParameter("email")
                         .passwordParameter("password")
-                        .defaultSuccessUrl("/", true) // Thành công thì về trang chủ
+                        .defaultSuccessUrl("/", true)
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/logout") // Đường dẫn để kích hoạt đăng xuất
-                        .logoutSuccessUrl("/auth/login?logout") // Đăng xuất xong thì quay về trang login
-                        .invalidateHttpSession(true) // Xóa session hiện tại
-                        .deleteCookies("JSESSIONID") // Xóa cookie trình duyệt
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/auth/login?logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                         .permitAll()
                 );
 

@@ -6,6 +6,7 @@ import com.example.LVTN.entity.User;
 import com.example.LVTN.service.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,9 @@ public class AdminController {
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
 
@@ -146,7 +150,6 @@ public class AdminController {
         return "admin/category/add";
     }
 
-    // DELETE
     @GetMapping("/category/delete/{id}")
     public String deleteCategory(@PathVariable Long id) {
 
@@ -157,7 +160,7 @@ public class AdminController {
 
 
 
-    // LIST USER
+
     @GetMapping("/users")
     public String manageUsers(Model model) {
 
@@ -166,7 +169,7 @@ public class AdminController {
         return "admin/user/list";
     }
 
-    // FORM ADD USER
+
     @GetMapping("/user/add")
     public String addUser(Model model) {
 
@@ -179,7 +182,10 @@ public class AdminController {
 
     @PostMapping("/user/save")
     public String saveUser(@ModelAttribute("user") User user) {
-
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            String encodedPassword = passwordEncoder.encode(user.getPassword());
+            user.setPassword(encodedPassword);
+        }
         userService.save(user);
 
         return "redirect:/admin/users";

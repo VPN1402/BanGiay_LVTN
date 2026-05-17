@@ -22,14 +22,14 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model, HttpServletRequest request) {
-        // 1. Lấy danh sách sản phẩm từ DB
+
         List<Product> products = productService.findAll();
 
-        // 2. Đẩy danh sách vào model với tên là "products"
+
         model.addAttribute("products", productService.findFeatured());
         model.addAttribute("categories", categoryService.findFeatured());
 
-        // 3. Đẩy currentUri để Navbar không bị lỗi (như đã làm ở bước trước)
+
         model.addAttribute("currentUri", request.getRequestURI());
 
         return "user/home/index";

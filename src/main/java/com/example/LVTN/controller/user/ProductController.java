@@ -31,7 +31,6 @@ public class ProductController {
         model.addAttribute("products", products);
         model.addAttribute("currentUri", request.getRequestURI());
 
-        // Giữ lại các giá trị đã chọn để hiển thị lại trên form lọc
         model.addAttribute("selectedCat", categoryId);
         model.addAttribute("minPrice", minPrice);
         model.addAttribute("maxPrice", maxPrice);
@@ -40,16 +39,16 @@ public class ProductController {
     }
     @GetMapping("/product/detail/{id}")
     public String productDetail(@PathVariable("id") Long id, Model model, HttpServletRequest request) {
-        // Tìm sản phẩm theo id
+
         Product product = productService.findById(id);
 
         if (product == null) {
-            return "redirect:user/product/list"; // Nếu không thấy thì về danh sách
+            return "redirect:user/product/list";
         }
 
         model.addAttribute("product", product);
         model.addAttribute("currentUri", request.getRequestURI());
 
-        return "user/product/product-detail"; // Sẽ nằm tại templates/product/product-detail.html
+        return "user/product/product-detail";
     }
 }

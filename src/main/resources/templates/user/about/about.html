@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layouts/main-layout}">
+<head>
+    <title>Giới Thiệu - ShoeStore</title>
+</head>
+<body>
+<main layout:fragment="content" class="py-5 bg-light">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Trang Chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Giới Thiệu</li>
+            </ol>
+        </nav>
+
+        <div class="row align-items-center g-5 mb-5">
+            <div class="col-lg-6">
+                <div class="product-img-wrapper border rounded-3 overflow-hidden shadow-sm bg-white p-2">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=1000"
+                         alt="Về ShoeStore" class="img-fluid rounded-2 w-100" style="object-fit: cover; max-height: 450px;">
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="product-info">
+                    <div class="product-brand mb-2 text-uppercase fw-bold text-primary">Về Chúng Tôi</div>
+                    <h2 class="fw-bold text-dark mb-3" style="font-size: 2.5rem;">ShoeStore - Kicks Store</h2>
+
+                    <p class="text-muted lh-lg mb-3">
+                        Chào mừng bạn đến với <strong>ShoeStore</strong>, điểm đến lý tưởng cho những tín đồ đam mê giày thể thao và phong cách sống năng động. Chúng tôi tự hào mang đến những bộ sưu tập giày chính hãng đa dạng, từ các dòng giày chạy bộ êm ái, giày đá banh bền bỉ cho đến những mẫu sneaker thời thượng dẫn đầu xu hướng.
+                    </p>
+
+                    <p class="text-muted lh-lg mb-4">
+                        Với triết lý đặt trải nghiệm và sự hài lòng của khách hàng lên hàng đầu, ShoeStore không chỉ bán những đôi giày chất lượng, mà còn đồng hành cùng bạn trên mọi hành trình bứt phá giới hạn bản thân.
+                    </p>
+
+                    <div class="mt-4 pt-3 border-top">
+                        <ul class="list-unstyled row g-3">
+                            <li class="col-sm-6 small text-muted"><i class="fa-solid fa-shield-halved text-primary me-2"></i> Cam kết chính hãng 100%</li>
+                            <li class="col-sm-6 small text-muted"><i class="fa-solid fa-truck-fast text-primary me-2"></i> Miễn phí giao hàng toàn quốc</li>
+                            <li class="col-sm-6 small text-muted"><i class="fa-solid fa-arrow-rotate-left text-primary me-2"></i> Đổi trả dễ dàng trong 7 ngày</li>
+                            <li class="col-sm-6 small text-muted"><i class="fa-solid fa-headset text-primary me-2"></i> Hỗ trợ tư vấn 24/7</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-4">
+            <div class="col-12 text-center mb-2">
+                <h3 class="fw-bold text-uppercase">Giá Trị Cốt Lõi</h3>
+                <p class="text-muted">Những yếu tố làm nên uy tín và thương hiệu của ShoeStore</p>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="product-card p-4 text-center bg-white shadow-sm border-0 h-100 rounded-3">
+                    <div class="fs-1 text-primary mb-3">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2 text-dark">Chất Lượng Đỉnh Cao</h4>
+                    <p class="text-muted small mb-0">Mọi sản phẩm trước khi đến tay khách hàng đều trải qua quy trình kiểm tra nghiêm ngặt về chất lượng và nguồn gốc.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="product-card p-4 text-center bg-white shadow-sm border-0 h-100 rounded-3">
+                    <div class="fs-1 text-primary mb-3">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2 text-dark">Tận Tâm Phục Vụ</h4>
+                    <p class="text-muted small mb-0">Đội ngũ tư vấn viên luôn sẵn sàng lắng nghe, thấu hiểu để giúp bạn tìm được đôi giày vừa vặn và ưng ý nhất.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="product-card p-4 text-center bg-white shadow-sm border-0 h-100 rounded-3">
+                    <div class="fs-1 text-primary mb-3">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2 text-dark">Không Ngừng Đổi Mới</h4>
+                    <p class="text-muted small mb-0">Liên tục cập nhật những xu hướng công nghệ giày mới nhất để mang lại trải nghiệm vận động tốt nhất cho bạn.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+</body>
+</html>

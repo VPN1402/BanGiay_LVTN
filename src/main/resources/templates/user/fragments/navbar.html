@@ -54,6 +54,13 @@
                             Liên hệ
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${currentUri != null and #strings.contains(currentUri, '/about')} ? 'active' : ''"
+                           th:href="@{/about}">
+                            Giới Thiệu
+                        </a>
+                    </li>
                 </ul>
 
                 <div class="d-flex align-items-center justify-content-end">

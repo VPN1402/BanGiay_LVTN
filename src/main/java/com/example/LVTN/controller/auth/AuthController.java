@@ -16,21 +16,20 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
-    // Trang login
     @GetMapping("/auth/login")
     public String loginPage(Model model, HttpServletRequest request) {
         model.addAttribute("currentUri", request.getRequestURI());
         return "auth/login";
     }
 
-    // Trang register
+
     @GetMapping("/auth/register")
     public String registerPage(Model model, HttpServletRequest request) {
         model.addAttribute("currentUri", request.getRequestURI());
         return "auth/register";
     }
 
-    // Xử lý đăng ký
+
     @PostMapping("/auth/register")
     public String handleRegister(
             @RequestParam String fullName,
@@ -42,17 +41,14 @@ public class AuthController {
 
         try {
 
-            // Kiểm tra xác nhận mật khẩu
             if (!password.equals(confirmPassword)) {
                 redirectAttributes.addFlashAttribute(
                         "errorMsg",
                         "Mật khẩu xác nhận không khớp!"
                 );
-
                 return "redirect:/auth/register";
             }
 
-            // Đăng ký user
             userService.registerUser(
                     fullName,
                     email,

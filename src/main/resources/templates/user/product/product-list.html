@@ -58,7 +58,7 @@
                                 <div class="product-category-text" th:text="${product.category.name}">Thể loại</div>
                                 <div class="product-brand" th:text="${product.brand.name}">Thương hiệu</div>
 
-                                <a th:href="@{/templates/user/product/detail/{id}(id=${product.id})}" class="text-decoration-none">
+                                <a th:href="@{/product/detail/{id}(id=${product.id})}" class="text-decoration-none">
                                     <h3 class="product-title" th:text="${product.name}">Tên sản phẩm</h3>
                                 </a>
 

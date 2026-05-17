@@ -24,7 +24,7 @@ public class CategoryController {
     public String getAllCategories(Model model, HttpServletRequest request) {
         model.addAttribute("categories", categoryService.findAll());
 
-        // QUAN TRỌNG: Gửi đường dẫn hiện tại sang để Navbar gạch chân
+
         model.addAttribute("currentUri", request.getRequestURI());
 
         return "user/category/category-list";
