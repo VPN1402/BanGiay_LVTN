@@ -1,118 +1,112 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org"  layout:decorate="~{user/layouts/main-layout}"
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{user/layouts/main-layout}"
       xmlns:layout="http://www.w3.org/1999/xhtml">
 <head>
     <title>Giỏ Hàng - Kicks Store</title>
 </head>
 <body>
-    <main layout:fragment="content" class="py-5 bg-light">
-        <div class="container">
-            <h2 class="fw-bold mb-4">Giỏ Hàng Của Bạn</h2>
+<main layout:fragment="content" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="fw-bold mb-4">Giỏ Hàng Của Bạn</h2>
 
-            <div class="row gx-5">
-                <!-- Cart Items -->
-                <div class="col-lg-8 mb-4 mb-lg-0">
-                    <div class="bg-white p-4 rounded shadow-sm">
-                        
-                        <!-- Header -->
-                        <div class="d-none d-md-flex text-muted small pb-2 border-bottom mb-3">
-                            <div class="col-6">Sản phẩm</div>
-                            <div class="col-2 text-center">Đơn giá</div>
-                            <div class="col-2 text-center">Số lượng</div>
-                            <div class="col-2 text-end">Tổng</div>
-                        </div>
+        <div th:if="${#lists.isEmpty(cartItems)}" class="text-center py-5 bg-white rounded shadow-sm">
+            <i class="fa-solid fa-basket-shopping fs-1 text-muted mb-3"></i>
+            <h4 class="text-muted">Giỏ hàng của bạn đang trống!</h4>
+            <a th:href="@{/}" class="btn btn-secondary mt-3">Quay lại mua sắm</a>
+        </div>
 
-                        <!-- Item 1 -->
-                        <div class="row align-items-center py-3 border-bottom">
-                            <div class="col-12 col-md-6 d-flex align-items-center mb-3 mb-md-0">
-                                <a href="#" class="text-danger me-3"><i class="fa-solid fa-trash-can"></i></a>
-                                <img th:src="@{/images/cart-item-1.jpg}" alt="Product" class="cart-item-img me-3">
-                                <div>
-                                    <h6 class="mb-1"><a href="#" class="text-dark">Nike Air Max 270 React</a></h6>
-                                    <div class="text-muted small">Size: 42</div>
-                                </div>
-                            </div>
-                            <div class="col-4 col-md-2 text-md-center">
-                                <span class="d-md-none text-muted small">Đơn giá: </span>
-                                3.500.000đ
-                            </div>
-                            <div class="col-4 col-md-2">
-                                <div class="input-group input-group-sm qty-input mx-auto">
-                                    <button class="btn btn-outline-secondary qty-btn-minus" type="button">-</button>
-                                    <input type="text" class="form-control text-center bg-white" value="1" readonly>
-                                    <button class="btn btn-outline-secondary qty-btn-plus" type="button">+</button>
-                                </div>
-                            </div>
-                            <div class="col-4 col-md-2 text-end fw-bold text-primary-custom">
-                                3.500.000đ
+        <div th:if="${!#lists.isEmpty(cartItems)}" class="row gx-5">
+            <div class="col-lg-8 mb-4 mb-lg-0">
+                <div class="bg-white p-4 rounded shadow-sm">
+
+                    <div class="d-none d-md-flex text-muted small pb-2 border-bottom mb-3">
+                        <div class="col-6">Sản phẩm</div>
+                        <div class="col-2 text-center">Đơn giá</div>
+                        <div class="col-2 text-center">Số lượng</div>
+                        <div class="col-2 text-end">Tổng</div>
+                    </div>
+
+                    <div th:each="item : ${cartItems}" class="row align-items-center py-3 border-bottom">
+
+                        <div class="col-12 col-md-6 d-flex align-items-center mb-3 mb-md-0">
+                            <a th:href="@{/cart/delete(productId=${item.product.id}, size=${item.size})}" class="text-danger me-3">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </a>
+
+                            <img th:src="${item.product.thumbnail}" alt="Product" class="cart-item-img me-3" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;">
+
+                            <div>
+                                <h6 class="mb-1">
+                                    <a href="#" class="text-dark th-text-primary-hover" th:text="${item.product.name}">Tên sản phẩm</a>
+                                </h6>
+                                <div class="text-muted small" th:text="'Size: ' + ${item.size}">Size: 42</div>
                             </div>
                         </div>
 
-                        <!-- Item 2 -->
-                        <div class="row align-items-center py-3 border-bottom">
-                            <div class="col-12 col-md-6 d-flex align-items-center mb-3 mb-md-0">
-                                <a href="#" class="text-danger me-3"><i class="fa-solid fa-trash-can"></i></a>
-                                <img th:src="@{/images/cart-item-2.jpg}" alt="Product" class="cart-item-img me-3">
-                                <div>
-                                    <h6 class="mb-1"><a href="#" class="text-dark">Adidas Ultraboost 22</a></h6>
-                                    <div class="text-muted small">Size: 40</div>
-                                </div>
-                            </div>
-                            <div class="col-4 col-md-2 text-md-center">
-                                <span class="d-md-none text-muted small">Đơn giá: </span>
-                                4.200.000đ
-                            </div>
-                            <div class="col-4 col-md-2">
-                                <div class="input-group input-group-sm qty-input mx-auto">
-                                    <button class="btn btn-outline-secondary qty-btn-minus" type="button">-</button>
-                                    <input type="text" class="form-control text-center bg-white" value="1" readonly>
-                                    <button class="btn btn-outline-secondary qty-btn-plus" type="button">+</button>
-                                </div>
-                            </div>
-                            <div class="col-4 col-md-2 text-end fw-bold text-primary-custom">
-                                4.200.000đ
+                        <div class="col-4 col-md-2 text-md-center">
+                            <span class="d-md-none text-muted small">Đơn giá: </span>
+                            <span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">3.500.000đ</span>
+                        </div>
+
+                        <div class="col-4 col-md-2">
+                            <div class="input-group input-group-sm qty-input mx-auto" style="max-width: 100px;">
+                                <form th:action="@{/cart/update}" method="post" class="d-flex w-100">
+                                    <input type="hidden" name="productId" th:value="${item.product.id}">
+                                    <input type="hidden" name="size" th:value="${item.size}">
+
+                                    <button class="btn btn-outline-secondary px-2" type="submit" name="quantity" th:value="${item.quantity - 1}">-</button>
+
+                                    <input type="text" class="form-control text-center bg-white px-1" th:value="${item.quantity}" readonly>
+
+                                    <button class="btn btn-outline-secondary px-2" type="submit" name="quantity" th:value="${item.quantity + 1}">+</button>
+                                </form>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between mt-4">
-                            <a th:href="@{/templates/user/product/list}" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left me-2"></i>Tiếp tục mua hàng</a>
-                            <button class="btn btn-secondary">Cập nhật giỏ hàng</button>
+                        <div class="col-4 col-md-2 text-end fw-bold text-primary-custom">
+                            <span th:text="${#numbers.formatDecimal(item.getAmount(), 0, 'COMMA', 0, 'POINT')} + 'đ'">3.500.000đ</span>
                         </div>
                     </div>
-                </div>
 
-                <!-- Order Summary -->
-                <div class="col-lg-4">
-                    <div class="order-summary">
-                        <h5 class="fw-bold mb-4">Tổng Đơn Hàng</h5>
-                        
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Tạm tính:</span>
-                            <span>7.700.000đ</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
-                            <span class="text-muted">Phí giao hàng:</span>
-                            <span>Miễn phí</span>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between mb-4">
-                            <span class="fw-bold">Tổng cộng:</span>
-                            <span class="fw-bold text-primary-custom fs-5">7.700.000đ</span>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label text-muted small">Mã giảm giá</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Nhập mã...">
-                                <button class="btn btn-outline-secondary" type="button">Áp dụng</button>
-                            </div>
-                        </div>
-
-                        <a th:href="@{/templates/user/order/checkout}" class="btn btn-primary-custom w-100 btn-lg">Tiến Hành Thanh Toán</a>
+                    <div class="d-flex justify-content-between mt-4">
+                        <a th:href="@{/}" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Tiếp tục mua hàng
+                        </a>
                     </div>
                 </div>
             </div>
+
+            <div class="col-lg-4">
+                <div class="order-summary bg-white p-4 rounded shadow-sm">
+                    <h5 class="fw-bold mb-4">Tổng Đơn Hàng</h5>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tạm tính:</span>
+                        <span th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">7.700.000đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Phí giao hàng:</span>
+                        <span>Miễn phí</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fw-bold">Tổng cộng:</span>
+                        <span class="fw-bold text-primary-custom fs-5" th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">7.700.000đ</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small">Mã giảm giá</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Nhập mã...">
+                            <button class="btn btn-outline-secondary" type="button">Áp dụng</button>
+                        </div>
+                    </div>
+
+                    <a th:href="@{/order/checkout}" class="btn btn-primary-custom w-100 btn-lg text-center d-block">Tiến Hành Thanh Toán</a>
+                </div>
+            </div>
         </div>
-    </main>
+    </div>
+</main>
 </body>
 </html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layouts/main-layout}">
+
+<head>
+    <title>Quản Lý Tin Nhắn Liên Hệ</title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center pt-3 pb-3 mb-4 border-bottom">
+        <div>
+            <h1 class="h2 fw-bold">Hộp Thư Liên Hệ</h1>
+            <p class="text-muted mb-0">Xem danh sách các ý kiến phản hồi, góp ý hoặc yêu cầu trợ giúp từ khách hàng</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow rounded-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width: 70px;">ID</th>
+                        <th style="width: 180px;">Khách hàng</th>
+                        <th style="width: 200px;">Chủ đề</th>
+                        <th>Nội dung lời nhắn</th>
+                        <th style="width: 150px;" class="text-center">Trạng thái</th>
+                        <th style="width: 140px;" class="text-center">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="c : ${contacts}" th:classappend="${c.status == 0} ? 'table-warning-subtle fw-bold' : ''">
+                        <td th:text="${c.id}"></td>
+                        <td>
+                            <span th:text="${c.name}"></span><br>
+                            <small class="text-muted" th:text="${c.email}"></small>
+                        </td>
+                        <td th:text="${c.subject}"></td>
+                        <td>
+                            <p class="mb-0 text-truncate" style="max-width: 350px;" th:text="${c.message}"></p>
+                        </td>
+                        <td class="text-center">
+                            <span th:if="${c.status == 0}" class="badge bg-warning text-dark px-2 py-1.5">Chưa đọc</span>
+                            <span th:if="${c.status == 1}" class="badge bg-light text-secondary border px-2 py-1.5">Đã đọc</span>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                    data-bs-toggle="modal"
+                                    th:data-bs-target="'#viewContactModal-' + ${c.id}">
+                                <i class="bi bi-eye"></i> Xem
+                            </button>
+
+                            <a th:if="${c.status == 0}" th:href="@{/admin/contact/read/{id}(id=${c.id})}" class="btn btn-sm btn-success">
+                                <i class="bi bi-check2"></i> Duyệt
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(contacts)}">
+                        <td colspan="6" class="text-center text-muted py-4">Hộp thư liên hệ hiện đang trống.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:each="c : ${contacts}" th:remove="tag">
+        <div class="modal fade" th:id="'viewContactModal-' + ${c.id}" tabindex="-1" aria-hidden="true" style="text-align: left;">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 shadow border-0">
+                    <div class="modal-header border-0 pt-4 px-4">
+                        <h5 class="modal-title fw-bold text-primary"><i class="bi bi-envelope-open me-2"></i>Chi Tiết Yêu Cầu Trợ Giúp</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body px-4">
+                        <div class="mb-3 border-bottom pb-2">
+                            <p class="mb-1 text-muted small">Người gửi:</p>
+                            <h6 class="fw-bold mb-0">[[${c.name}]] (<span class="text-primary">[[${c.email}]]</span>)</h6>
+                        </div>
+                        <div class="mb-3 border-bottom pb-2">
+                            <p class="mb-1 text-muted small">Chủ đề:</p>
+                            <h6 class="fw-bold text-dark mb-0">[[${c.subject}]]</h6>
+                        </div>
+                        <div class="mb-3">
+                            <p class="mb-1 text-muted small">Nội dung tin nhắn:</p>
+                            <div class="p-3 bg-light rounded-3 text-secondary" style="white-space: pre-wrap; word-break: break-all;">[[${c.message}]]</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pb-4 px-4">
+                        <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Đóng cửa sổ</button>
+                        <a th:if="${c.status == 0}" th:href="@{/admin/contact/read/{id}(id=${c.id})}" class="btn btn-success rounded-3 px-4">Xác nhận đã đọc</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

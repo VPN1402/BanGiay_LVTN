@@ -42,9 +42,16 @@
                                 <button class="action-btn" data-bs-toggle="tooltip" title="Yêu thích">
                                     <i class="fa-regular fa-heart"></i>
                                 </button>
-                                <button class="action-btn btn-add-cart" data-bs-toggle="tooltip" title="Thêm vào giỏ">
-                                    <i class="fa-solid fa-cart-plus"></i>
-                                </button>
+
+                                <form th:action="@{/cart/add}" method="post" style="display: inline;">
+                                    <input type="hidden" name="productId" th:value="${product.id}">
+                                    <input type="hidden" name="size" value="40">
+                                    <input type="hidden" name="quantity" value="1">
+
+                                    <button type="submit" class="action-btn btn-add-cart" data-bs-toggle="tooltip" title="Thêm vào giỏ">
+                                        <i class="fa-solid fa-cart-plus"></i>
+                                    </button>
+                                </form>
                             </div>
 
                             <div class="product-img-wrapper">
@@ -55,8 +62,8 @@
                             </div>
 
                             <div class="product-info">
-                                <div class="product-category-text" th:text="${product.category.name}">Thể loại</div>
-                                <div class="product-brand" th:text="${product.brand.name}">Thương hiệu</div>
+                                <div class="product-category-text" th:text="${product.category != null ? product.category.name : 'Chưa phân loại'}">Thể loại</div>
+                                <div class="product-brand" th:text="${product.brand != null ? product.brand.name : 'Không có thương hiệu'}">Thương hiệu</div>
 
                                 <a th:href="@{/product/detail/{id}(id=${product.id})}" class="text-decoration-none">
                                     <h3 class="product-title" th:text="${product.name}">Tên sản phẩm</h3>

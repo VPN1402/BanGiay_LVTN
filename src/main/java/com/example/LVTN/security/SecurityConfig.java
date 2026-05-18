@@ -23,6 +23,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/css/**", "/js/**", "/register").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/cart/**").permitAll()
                         .anyRequest().permitAll()
                 )
                 .formLogin(login -> login

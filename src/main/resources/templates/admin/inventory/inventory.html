@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layouts/main-layout}">
+
+<head>
+  <title>Quản Lý Tồn Kho</title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+
+  <div class="d-flex justify-content-between align-items-center pt-3 pb-3 mb-4 border-bottom">
+    <div>
+      <h1 class="h2 fw-bold">Quản Lý Tồn Kho</h1>
+      <p class="text-muted mb-0">Theo dõi số lượng hàng hóa và tình trạng tồn kho theo từng biến thể size</p>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow rounded-4 h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-muted mb-1">Tổng số mặt hàng</p>
+              <h2 class="fw-bold" th:text="${products.size()}">0</h2>
+            </div>
+            <i class="bi bi-box-seam fs-1 text-primary"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow rounded-4 h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-muted mb-1">Sản phẩm sắp hết (&lt;= 10 đôi)</p>
+              <h2 class="fw-bold text-warning" th:text="${sapHetCount}">0</h2>
+            </div>
+            <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow rounded-4 h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-muted mb-1">Sản phẩm hết hàng</p>
+              <h2 class="fw-bold text-danger" th:text="${hetHangCount}">0</h2>
+            </div>
+            <i class="bi bi-x-circle fs-1 text-danger"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow rounded-4">
+    <div class="card-header bg-white border-0 pt-4">
+      <h5 class="fw-bold mb-0">Danh Sách Kho Hàng (Tổng hợp theo Size)</h5>
+    </div>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle table-hover">
+          <thead class="table-light">
+          <tr>
+            <th style="width: 80px;">ID</th>
+            <th>Hình ảnh</th>
+            <th>Tên sản phẩm</th>
+            <th>Chi tiết Size trong kho</th>
+            <th>Giá bán</th>
+            <th class="text-center" style="width: 140px;">Tổng tồn</th>
+            <th class="text-center" style="width: 160px;">Trạng thái</th>
+            <th class="text-center" style="width: 130px;">Hành động</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="p : ${products}">
+            <td th:text="${p.id}"></td>
+            <td>
+              <img th:src="${p.thumbnail != null ? p.thumbnail : '/images/no-image.png'}"
+                   th:alt="${p.name}"
+                   style="width: 50px; height: 50px; object-fit: contain; background: #f8f9fa;"
+                   class="rounded border">
+            </td>
+            <td class="fw-bold" th:text="${p.name}"></td>
+            <td>
+              <div class="d-flex flex-wrap gap-1">
+                                <span th:each="ps : ${p.productSizes}"
+                                      th:classappend="${ps.quantity == 0} ? 'bg-danger' : (${ps.quantity <= 3} ? 'bg-warning text-dark' : 'bg-light text-dark border')"
+                                      class="badge p-2">
+                                    Size <span th:text="${ps.size}"></span>: <strong th:text="${ps.quantity}">0</strong>
+                                </span>
+                <span th:if="${#lists.isEmpty(p.productSizes)}" class="text-muted small">Chưa cài đặt size</span>
+              </div>
+            </td>
+            <td class="text-danger fw-bold">
+              <span th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')}"></span> đ
+            </td>
+
+            <td class="text-center fw-bold fs-5 text-primary" th:text="${p.getTotalQuantity()}">0</td>
+
+            <td class="text-center">
+              <span th:if="${p.getTotalQuantity() == 0}" class="badge bg-danger px-3 py-2 rounded-pill">Hết hàng</span>
+              <span th:if="${p.getTotalQuantity() > 0 and p.getTotalQuantity() <= 10}" class="badge bg-warning text-dark px-3 py-2 rounded-pill">Sắp hết</span>
+              <span th:if="${p.getTotalQuantity() > 10}" class="badge bg-success px-3 py-2 rounded-pill">Ổn định</span>
+            </td>
+
+            <td class="text-center">
+              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                      data-bs-toggle="modal"
+                      th:data-bs-target="'#updateStockModal-' + ${p.id}">
+                <i class="bi bi-pencil-square"></i> Nhập kho
+              </button>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(products)}">
+            <td colspan="8" class="text-center text-muted py-4">Không có dữ liệu sản phẩm nào trong kho.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div th:each="p : ${products}" th:remove="tag">
+    <div class="modal fade" th:id="'updateStockModal-' + ${p.id}" tabindex="-1" aria-hidden="true" style="text-align: left;">
+      <div class="modal-dialog modal-dialog-centered">
+
+        <form th:action="@{/admin/inventory/update}" method="POST" class="modal-content rounded-4 shadow border-0">
+
+          <div class="modal-header border-0 pt-4 px-4">
+            <h5 class="modal-title fw-bold">Cập Nhật Số Lượng Kho</h5>
+            <button type="button" class="btn-close" data-bs-shadow="none" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body px-4">
+            <p class="mb-3 text-muted">Sản phẩm: <strong class="text-dark" th:text="${p.name}"></strong></p>
+
+            <div th:if="${#lists.isEmpty(p.productSizes)}" class="text-danger my-3">
+              Sản phẩm này chưa được cấu hình biến thể Size. Vui lòng thêm size trước!
+            </div>
+
+            <div th:each="ps : ${p.productSizes}" class="mb-3 row align-items-center">
+              <label class="col-sm-4 fw-bold text-secondary">Size [[${ps.size}]]:</label>
+              <div class="col-sm-8">
+                <input type="hidden" name="productSizeIds" th:value="${ps.id}"/>
+                <input type="number" name="quantities" th:value="${ps.quantity}" class="form-control rounded-3" min="0" required/>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer border-0 pb-4 px-4">
+            <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy bỏ</button>
+            <button type="submit" class="btn btn-primary rounded-3 px-4" th:disabled="${#lists.isEmpty(p.productSizes)}">Lưu cập nhật</button>
+          </div>
+
+        </form> </div>
+    </div>
+  </div>
+
+</div> </body>
+</html>

@@ -69,10 +69,13 @@
                         <i class="fa-solid fa-magnifying-glass fs-5"></i>
                     </a>
 
-                    <a th:href="@{#}" class="nav-link px-3 position-relative text-dark">
+                    <a th:href="@{/cart}" class="nav-link px-3 position-relative text-dark"
+                       th:classappend="${currentUri == '/cart'} ? 'active' : ''">
                         <i class="fa-solid fa-cart-shopping fs-5"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                              style="font-size: 0.65rem; padding: 0.35em 0.65em; margin-top: 5px; margin-left: -5px;">
+                              style="font-size: 0.65rem; padding: 0.35em 0.65em; margin-top: 5px; margin-left: -5px;"
+                              th:text="${totalQuantity != null ? totalQuantity : 0}"
+                        >
                             0
                         </span>
                     </a>
@@ -129,9 +132,10 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
                 <div class="modal-body p-4">
-                    <form th:action="@{/templates/user/product/search}" method="get" class="d-flex">
+                    <form th:action="@{/product-list}" method="get" class="d-flex">
                         <input type="text"
                                name="keyword"
+                               th:value="${param.keyword}"
                                class="form-control form-control-lg border-0 shadow-none bg-light me-2"
                                placeholder="Tìm kiếm sản phẩm..."
                                autofocus>

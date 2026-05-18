@@ -36,11 +36,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> filterProducts(Long categoryId, Double minPrice, Double maxPrice) {
-        return productRepository.filterProducts(categoryId, minPrice, maxPrice);
-    }
-    public List<Product> findFeatured() {
+    public List<Product> filterProducts(Long categoryId, Double minPrice, Double maxPrice, String keyword) {
 
+        String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+
+
+        return productRepository.filterProducts(categoryId, minPrice, maxPrice, searchKeyword);
+    }
+
+
+    @Override
+    public List<Product> findFeatured() {
         return productRepository.findByFeaturedTrue();
     }
 }

@@ -1,38 +1,30 @@
 package com.example.LVTN.controller.user;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.LVTN.entity.Contact;
+import com.example.LVTN.repository.ContactRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.GetMapping; // Thêm import này
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class ContactController {
 
-    @GetMapping("/contact")
-    public String showContactPage(Model model, HttpServletRequest request) {
+    @Autowired
+    private ContactRepository contactRepository;
 
-        model.addAttribute("currentUri", request.getRequestURI());
-        return "user/contact/contact.html";
+
+    @GetMapping("/contact")
+    public String showContactPage() {
+        return "user/contact/contact";
     }
 
     @PostMapping("/contact/send")
-    public String handleContactForm(
-            @RequestParam String name,
-            @RequestParam String email,
-            @RequestParam String subject,
-            @RequestParam String message,
-            RedirectAttributes redirectAttributes) {
-
-
-        System.out.println("Nhận liên hệ từ: " + name + " (" + email + ")");
-        System.out.println("Chủ đề: " + subject);
-
-
-        redirectAttributes.addFlashAttribute("successMsg", "Cảm ơn bạn! Tin nhắn đã được gửi đi thành công.");
-
+    public String handleContactForm(@ModelAttribute Contact contact, RedirectAttributes redirectAttributes) {
+        contactRepository.save(contact);
+        redirectAttributes.addFlashAttribute("successMsg", "Tin nhắn của bạn đã được gửi đi thành công! Chúng tôi sẽ phản hồi sớm nhất.");
         return "redirect:/contact";
     }
 }

@@ -15,6 +15,6 @@ public interface ProductService {
 
     void delete(Long id);
 
-    List<Product> filterProducts(Long categoryId, Double minPrice, Double maxPrice);
+    List<Product> filterProducts(Long categoryId, Double minPrice, Double maxPrice,String keyword);
     List<Product> findFeatured();
 }

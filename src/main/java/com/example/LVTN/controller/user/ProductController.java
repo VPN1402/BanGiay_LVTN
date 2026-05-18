@@ -1,7 +1,7 @@
 package com.example.LVTN.controller.user;
 
-
 import com.example.LVTN.entity.Product;
+import com.example.LVTN.repository.ProductRepository;
 import com.example.LVTN.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,15 +18,19 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+    @Autowired
+    private ProductRepository productRepository;
 
     @GetMapping("/product-list")
     public String listProducts(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) String keyword,
             Model model, HttpServletRequest request) {
 
-        List<Product> products = productService.filterProducts(categoryId, minPrice, maxPrice);
+
+        List<Product> products = productService.filterProducts(categoryId, minPrice, maxPrice, keyword);
 
         model.addAttribute("products", products);
         model.addAttribute("currentUri", request.getRequestURI());
@@ -34,9 +38,11 @@ public class ProductController {
         model.addAttribute("selectedCat", categoryId);
         model.addAttribute("minPrice", minPrice);
         model.addAttribute("maxPrice", maxPrice);
+        model.addAttribute("keyword", keyword);
 
         return "user/product/product-list";
     }
+
     @GetMapping("/product/detail/{id}")
     public String productDetail(@PathVariable("id") Long id, Model model, HttpServletRequest request) {
 
