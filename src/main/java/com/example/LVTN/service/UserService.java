@@ -5,7 +5,7 @@ import com.example.LVTN.entity.User;
 import java.util.List;
 
 public interface UserService {
-
+    User findByEmail(String email);
     void registerUser(String fullName,
                       String email,
                       String phone,

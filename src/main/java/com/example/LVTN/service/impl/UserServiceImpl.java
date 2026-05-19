@@ -72,7 +72,11 @@ public class UserServiceImpl implements UserService {
                 .orElse(null);
     }
 
-
+    @Override
+    public User findByEmail(String email) {
+        // Trả về User tìm được theo email, nếu không thấy trả về null
+        return userRepository.findByEmail(email).orElse(null);
+    }
 
     @Override
     public List<User> findAll() {
