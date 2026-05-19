@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{admin/layouts/main-layout}"
+      xmlns:layout="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>Tạo Phiếu Nhập Kho</title>
+</head>
+
+<body>
+
+<div layout:fragment="content" class="container py-4">
+
+    <h2 class="fw-bold mb-4">
+        Tạo Phiếu Nhập Kho
+    </h2>
+
+    <form th:action="@{/admin/import/save}"
+          method="post"
+          th:object="${importReceipt}">
+
+        <!-- Thông tin phiếu -->
+        <div class="card p-4 mb-4">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <select th:field="*{supplier.id}"
+                            class="form-select"
+                            required>
+
+                        <option value="">
+                            -- Chọn nhà cung cấp --
+                        </option>
+
+                        <option th:each="s : ${allSuppliers}"
+                                th:value="${s.id}"
+                                th:text="${s.name}">
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-12">
+
+                    <label class="form-label fw-bold">
+                        Ghi chú
+                    </label>
+
+                    <textarea th:field="*{note}"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Nhập ghi chú..."></textarea>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Bảng sản phẩm -->
+        <table class="table table-bordered align-middle"
+               id="importTable">
+
+            <thead class="table-light">
+
+            <tr>
+                <th style="width: 50%">
+                    Sản phẩm - Size
+                </th>
+
+                <th style="width: 15%">
+                    Số lượng
+                </th>
+
+                <th style="width: 20%">
+                    Giá nhập
+                </th>
+
+                <th style="width: 15%">
+                    Hành động
+                </th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr>
+
+                <td>
+
+                    <select name="details[0].productSize.id"
+                            class="form-select"
+                            required>
+
+                        <option value="">
+                            -- Chọn sản phẩm --
+                        </option>
+
+                        <option th:each="ps : ${allProductSizes}"
+                                th:value="${ps.id}"
+                                th:text="${(ps.product != null ? ps.product.name : 'Không xác định') + ' - Size ' + ps.size}">
+                        </option>
+
+                    </select>
+
+                </td>
+
+                <td>
+
+                    <input type="number"
+                           name="details[0].quantity"
+                           class="form-control"
+                           min="1"
+                           value="1"
+                           required>
+
+                </td>
+
+                <td>
+
+                    <input type="number"
+                           name="details[0].importPrice"
+                           class="form-control"
+                           min="0"
+                           required>
+
+                </td>
+
+                <td class="text-center">
+
+                    <button type="button"
+                            class="btn btn-danger"
+                            onclick="removeRow(this)">
+
+                        Xóa
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+        <div class="d-flex justify-content-between mt-3">
+
+            <button type="button"
+                    class="btn btn-secondary"
+                    onclick="addRow()">
+
+                + Thêm sản phẩm
+
+            </button>
+
+            <button type="submit"
+                    class="btn btn-primary">
+
+                Xác nhận nhập kho
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script th:inline="javascript">
+
+    let rowIdx = 1;
+
+    /*<![CDATA[*/
+    const allProductSizes = /*[[${allProductSizes}]]*/ [];
+    /*]]>*/
+
+    function addRow() {
+
+        let tbody = document.querySelector("#importTable tbody");
+
+        let optionsHtml =
+            '<option value="">-- Chọn sản phẩm --</option>';
+
+        allProductSizes.forEach(function(ps) {
+
+            let productName =
+                ps.product && ps.product.name
+                    ? ps.product.name
+                    : 'Không xác định';
+
+            optionsHtml +=
+                `<option value="${ps.id}">
+                    ${productName} - Size ${ps.size}
+                 </option>`;
+        });
+
+        let row = `
+            <tr>
+
+                <td>
+
+                    <select name="details[${rowIdx}].productSize.id"
+                            class="form-select"
+                            required>
+
+                        ${optionsHtml}
+
+                    </select>
+
+                </td>
+
+                <td>
+
+                    <input type="number"
+                           name="details[${rowIdx}].quantity"
+                           class="form-control"
+                           min="1"
+                           value="1"
+                           required>
+
+                </td>
+
+                <td>
+
+                    <input type="number"
+                           name="details[${rowIdx}].importPrice"
+                           class="form-control"
+                           min="0"
+                           required>
+
+                </td>
+
+                <td class="text-center">
+
+                    <button type="button"
+                            class="btn btn-danger"
+                            onclick="removeRow(this)">
+
+                        Xóa
+
+                    </button>
+
+                </td>
+
+            </tr>
+        `;
+
+        tbody.insertAdjacentHTML("beforeend", row);
+
+        rowIdx++;
+    }
+
+    function removeRow(btn) {
+
+        let tbody =
+            document.querySelector("#importTable tbody");
+
+        if (tbody.rows.length <= 1) {
+
+            alert("Phải có ít nhất 1 sản phẩm!");
+
+            return;
+        }
+
+        btn.closest("tr").remove();
+
+        reIndexRows();
+    }
+
+    function reIndexRows() {
+
+        let rows =
+            document.querySelectorAll("#importTable tbody tr");
+
+        rows.forEach((row, index) => {
+
+            row.querySelector("select").name =
+                `details[${index}].productSize.id`;
+
+            row.querySelectorAll("input")[0].name =
+                `details[${index}].quantity`;
+
+            row.querySelectorAll("input")[1].name =
+                `details[${index}].importPrice`;
+        });
+
+        rowIdx = rows.length;
+    }
+
+</script>
+
+</body>
+</html>

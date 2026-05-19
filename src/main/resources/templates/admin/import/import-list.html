@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{admin/layouts/main-layout}"
+      xmlns:layout="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>Danh Sách Phiếu Nhập</title>
+</head>
+
+<body>
+
+<div layout:fragment="content" class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2 class="fw-bold">
+            Danh Sách Phiếu Nhập Kho
+        </h2>
+
+        <a th:href="@{/admin/import/create}"
+           class="btn btn-primary">
+
+            + Tạo Phiếu Nhập
+
+        </a>
+
+    </div>
+
+    <!-- Card -->
+    <div class="card shadow-sm p-4">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-hover align-middle">
+
+                <thead class="table-light text-center">
+
+                <tr>
+                    <th>ID</th>
+                    <th>Nhà Cung Cấp</th>
+                    <th>Người Nhập</th>
+                    <th>Sản Phẩm Nhập</th>
+                    <th>Tổng Tiền</th>
+                    <th>Ghi Chú</th>
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <!-- Danh sách phiếu -->
+                <tr th:each="r : ${receipts}">
+
+                    <!-- ID -->
+                    <td class="text-center"
+                        th:text="${r.id}">
+                    </td>
+
+                    <!-- Nhà cung cấp -->
+                    <td th:text="${r.supplier != null ? r.supplier.name : 'Không có'}">
+                    </td>
+
+                    <!-- Người nhập -->
+                    <td th:text="${r.user != null ? r.user.fullName : 'Không xác định'}">
+                    </td>
+
+                    <!-- Sản phẩm nhập -->
+                    <td>
+                        <div th:if="${r.details != null && !#lists.isEmpty(r.details)}">
+                            <div th:each="d : ${r.details}" class="mb-1 p-1 border-bottom-dashed">
+            <span class="fw-semibold"
+                  th:text="${d.productSize != null && d.productSize.product != null ? d.productSize.product.name : 'Sản phẩm không xác định'}">
+            </span>
+
+                                <span class="text-muted"> - </span>
+
+                                <span class="badge bg-secondary"
+                                      th:text="${d.productSize != null ? 'Size ' + d.productSize.size : 'Size không rõ'}">
+            </span>
+
+                                <span class="text-muted"> | </span>
+
+                                <span>SL:</span>
+                                <span class="text-primary fw-bold" th:text="${d.quantity}"></span>
+                            </div>
+                        </div>
+                        <div th:if="${r.details == null || #lists.isEmpty(r.details)}" class="text-muted">
+                            Không có sản phẩm
+                        </div>
+                    </td>
+
+                    <!-- Tổng tiền -->
+                    <td class="text-danger fw-bold"
+                        th:text="${#numbers.formatDecimal(r.totalAmount,0,'COMMA',0,'POINT')} + ' đ'">
+                    </td>
+
+                    <!-- Ghi chú -->
+                    <td th:text="${r.note != null && !#strings.isEmpty(r.note)
+                    ? r.note
+                    : 'Không có ghi chú'}">
+                    </td>
+
+                </tr>
+
+                <!-- Nếu không có dữ liệu -->
+                <tr th:if="${#lists.isEmpty(receipts)}">
+
+                    <td colspan="6"
+                        class="text-center text-muted py-4">
+
+                        Chưa có phiếu nhập nào
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

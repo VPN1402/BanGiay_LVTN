@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{admin/layouts/main-layout}"
+      xmlns:layout="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Quản Lý Nhà Cung Cấp Giày</title>
+</head>
+<body>
+<div layout:fragment="content" class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold m-0 text-dark">👟 Đối Tác Cung Cấp Giày</h2>
+            <small class="text-muted">Quản lý các xưởng sản xuất, tổng kho phân phối giày thể thao</small>
+        </div>
+        <a th:href="@{/admin/supplier/add}" class="btn btn-primary d-flex align-items-center">
+            <span class="me-1 fw-bold">+</span> Thêm Nhà Cung Cấp
+        </a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light border-bottom">
+                <tr>
+                    <th class="text-center py-3" style="width: 8%">ID</th>
+                    <th class="py-3" style="width: 25%">Nhà Cung Cấp / Xưởng Giày</th>
+                    <th class="py-3" style="width: 15%">Số Điện Thoại</th>
+                    <th class="py-3" style="width: 20%">Email Đối Tác</th>
+                    <th class="py-3" style="width: 20%">Địa Chỉ Kho</th>
+                    <th class="text-center py-3" style="width: 12%">Hành Động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="s : ${suppliers}">
+                    <td class="text-center fw-bold text-muted" th:text="${s.id}"></td>
+                    <td>
+                        <div class="fw-semibold text-dark" th:text="${s.name}"></div>
+                        <small class="text-muted" th:text="'Hợp tác từ: ' + ${#temporals.format(s.createdAt, 'dd/MM/yyyy')}"></small>
+                    </td>
+                    <td class="font-monospace text-secondary" th:text="${s.phone != null && !s.phone.isEmpty() ? s.phone : '---'}"></td>
+                    <td th:text="${s.email != null && !s.email.isEmpty() ? s.email : '---'}"></td>
+                    <td class="text-truncate" style="max-width: 200px;" th:text="${s.address != null && !s.address.isEmpty() ? s.address : '---'}"></td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm">
+                            <a th:href="@{/admin/supplier/edit/{id}(id=${s.id})}" class="btn btn-outline-warning">
+                                Sửa
+                            </a>
+                            <a th:href="@{/admin/supplier/delete/{id}(id=${s.id})}" class="btn btn-outline-danger"
+                               onclick="return confirm('Bạn có chắc chắn muốn ngừng hợp tác và xóa nhà cung cấp này? Các phiếu nhập cũ sẽ bị ảnh hưởng!')">
+                                Xóa
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(suppliers)}">
+                    <td colspan="6" class="text-center text-muted py-5">
+                        <div class="mb-2 fs-4">📦</div>
+                        Chưa có đối tác cung cấp giày nào được liên kết.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
