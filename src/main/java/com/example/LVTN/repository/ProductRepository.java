@@ -11,7 +11,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByFeaturedTrue();
 
-
+//    JPQLlaaysy product k trùng
     @Query("SELECT DISTINCT p FROM Product p " +
             "LEFT JOIN p.category c " +
             "WHERE (:categoryId IS NULL OR c.id = :categoryId) " +
@@ -21,7 +21,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> filterProducts(@Param("categoryId") Long categoryId,
                                  @Param("minPrice") Double minPrice,
                                  @Param("maxPrice") Double maxPrice,
-                                 @Param("keyword") String keyword); // Đẩy keyword xuống cuối cùng
+                                 @Param("keyword") String keyword);
 
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Product> searchByName(@Param("keyword") String keyword);

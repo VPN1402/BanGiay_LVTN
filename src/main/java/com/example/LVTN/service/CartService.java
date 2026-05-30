@@ -17,5 +17,8 @@ public interface CartService {
     void remove(Long productId, int size);
 
     int getTotalQuantity();
+
     BigDecimal getTotalPrice();
+
+    void clearCart(Long userId);
 }

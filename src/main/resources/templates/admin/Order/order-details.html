@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layouts/main-layout}">
+<head>
+    <title>Chi tiết đơn hàng</title>
+</head>
+<body>
+
+<div layout:fragment="content" class="container-fluid py-4">
+    <div class="d-flex justify-content-between mb-4">
+        <h2 class="fw-bold">Chi tiết đơn hàng #[[${order.id}]]</h2>
+        <a href="/admin/orders" class="btn btn-outline-secondary">Quay lại danh sách</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card p-4 mb-4 shadow-sm rounded-4 border-0">
+                <h5 class="fw-bold mb-3"><i class="bi bi-person"></i> Thông tin người nhận</h5>
+                <p><strong>Họ tên:</strong> [[${order.receiverName}]]</p>
+                <p><strong>SĐT:</strong> [[${order.receiverPhone}]]</p>
+                <p><strong>Địa chỉ:</strong> [[${order.shippingAddress}]]</p>
+            </div>
+
+            <div class="card p-4 shadow-sm rounded-4 border-0">
+                <h5 class="fw-bold mb-3"><i class="bi bi-pencil-square"></i> Cập nhật đơn hàng</h5>
+                <form th:action="@{/admin/orders/update}" method="post">
+                    <input type="hidden" name="orderId" th:value="${order.id}">
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Trạng thái đơn</label>
+                        <select name="orderStatus" class="form-select">
+                            <option value="PENDING" th:selected="${order.orderStatus == 'PENDING'}">Chờ xác nhận</option>
+                            <option value="SHIPPING" th:selected="${order.orderStatus == 'SHIPPING'}">Đang giao</option>
+                            <option value="DELIVERED" th:selected="${order.orderStatus == 'DELIVERED'}">Đã giao</option>
+                            <option value="CANCELLED" th:selected="${order.orderStatus == 'CANCELLED'}">Đã hủy</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small">Thanh toán</label>
+                        <select name="paymentStatus" class="form-select">
+                            <option value="UNPAID" th:selected="${order.paymentStatus == 'UNPAID'}">Chưa thanh toán</option>
+                            <option value="PAID" th:selected="${order.paymentStatus == 'PAID'}">Đã thanh toán</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Cập nhật đơn hàng</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card p-4 shadow-sm rounded-4 border-0">
+                <h5 class="fw-bold mb-3"><i class="bi bi-box-seam"></i> Sản phẩm đã đặt</h5>
+                <table class="table align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Đơn giá</th>
+                        <th>SL</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${order.orderItems}">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img th:src="@{${item.product.thumbnail}}" style="width: 50px; height: 50px; object-fit: cover;" class="rounded me-2">
+                                <span>[[${item.product.name}]]</span>
+                            </div>
+                        </td>
+                        <td th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                        <td th:text="${item.quantity}"></td>
+                        <td class="fw-bold" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <hr>
+                <h4 class="text-end text-danger fw-bold">Tổng tiền: [[${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}]]đ</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

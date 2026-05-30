@@ -31,8 +31,7 @@ public class CategoryController {
 
     @GetMapping("/category/{id}")
     public String getProductByCategory(@PathVariable Long id, Model model, HttpServletRequest request) {
-
-        // ĐÃ SỬA: Truyền thêm tham số thứ 4 (keyword) là null để đúng cú pháp hàm mới
+        
         List<Product> products = productService.filterProducts(id, null, null, null);
 
         model.addAttribute("products", products);

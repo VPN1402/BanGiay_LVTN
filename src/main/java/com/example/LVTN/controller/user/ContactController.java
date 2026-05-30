@@ -2,8 +2,10 @@ package com.example.LVTN.controller.user;
 
 import com.example.LVTN.entity.Contact;
 import com.example.LVTN.repository.ContactRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping; // Thêm import này
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,7 +19,8 @@ public class ContactController {
 
 
     @GetMapping("/contact")
-    public String showContactPage() {
+    public String showContactPage(Model model, HttpServletRequest request) {
+        model.addAttribute("currentUri", request.getRequestURI());
         return "user/contact/contact";
     }
 

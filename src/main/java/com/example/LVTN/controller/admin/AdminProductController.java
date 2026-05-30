@@ -63,7 +63,7 @@ public class AdminProductController {
     @GetMapping("/categories")
     public String manageCategories(Model model) {
         model.addAttribute("categories", categoryService.findAll());
-        return "admin/category/list";
+        return "/admin/Category/list";
     }
 
     @GetMapping("/category/add")

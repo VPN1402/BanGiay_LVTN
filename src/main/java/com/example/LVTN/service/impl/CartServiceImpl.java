@@ -146,9 +146,11 @@ public class CartServiceImpl implements CartService {
         if (cart == null) return;
 
         if (user != null) {
-            // Đã đăng nhập: Xóa dưới DB
-            cartItemRepository.findByCartIdAndProductIdAndSize(cart.getId(), productId, size)
-                    .ifPresent(item -> cartItemRepository.delete(item));
+            cart.getItems().removeIf(item ->
+                    item.getProduct().getId().equals(productId)
+                            && item.getSize() == size
+            );
+            cartRepository.save(cart);
         } else {
             // Chưa đăng nhập: Xóa trên Session List
             cart.getItems().removeIf(item -> item.getProduct().getId().equals(productId) && item.getSize() == size);
@@ -174,5 +176,14 @@ public class CartServiceImpl implements CartService {
         return cart.getItems().stream()
                 .mapToInt(CartItem::getQuantity)
                 .sum();
+    }
+    @Override
+    @Transactional
+    public void clearCart(Long userId) {
+        // Dùng ifPresent để xóa an toàn, nếu giỏ hàng trống thì không làm gì cả
+        cartRepository.findByUserId(userId).ifPresent(cart -> {
+            cartItemRepository.deleteAll(cart.getItems());
+            cartRepository.save(cart); // Lưu lại trạng thái giỏ hàng đã trống
+        });
     }
 }

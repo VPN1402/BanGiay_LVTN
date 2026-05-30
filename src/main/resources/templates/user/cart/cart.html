@@ -37,7 +37,7 @@
 
                             <div>
                                 <h6 class="mb-1">
-                                    <a href="#" class="text-dark th-text-primary-hover" th:text="${item.product.name}">Tên sản phẩm</a>
+                                    <a th:href="@{/product/detail/{id}(id=${item.product.id})}" class="text-dark th-text-primary-hover" th:text="${item.product.name}">Tên sản phẩm</a>
                                 </h6>
                                 <div class="text-muted small" th:text="'Size: ' + ${item.size}">Size: 42</div>
                             </div>
@@ -94,15 +94,15 @@
                         <span class="fw-bold text-primary-custom fs-5" th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">7.700.000đ</span>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label text-muted small">Mã giảm giá</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Nhập mã...">
-                            <button class="btn btn-outline-secondary" type="button">Áp dụng</button>
-                        </div>
-                    </div>
+<!--                    <div class="mb-4">-->
+<!--                        <label class="form-label text-muted small">Mã giảm giá</label>-->
+<!--                        <div class="input-group">-->
+<!--                            <input type="text" class="form-control" placeholder="Nhập mã...">-->
+<!--                            <button class="btn btn-outline-secondary" type="button">Áp dụng</button>-->
+<!--                        </div>-->
+<!--                    </div>-->
 
-                    <a th:href="@{/order/checkout}" class="btn btn-primary-custom w-100 btn-lg text-center d-block">Tiến Hành Thanh Toán</a>
+                    <a th:href="@{/checkout}" class="btn btn-primary-custom w-100 btn-lg text-center d-block">Tiến Hành Thanh Toán</a>
                 </div>
             </div>
         </div>
