@@ -5,7 +5,7 @@
       layout:decorate="~{admin/layouts/main-layout}">
 
 <head>
-    <title>Thêm sản phẩm</title>
+    <title>Sửa sản phẩm</title>
 </head>
 
 <body>
@@ -14,8 +14,8 @@
 
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div>
-            <h1 class="h2 fw-bold">Thêm sản phẩm mới</h1>
-            <p class="text-muted mb-0">Quản lý thông tin sản phẩm trong hệ thống</p>
+            <h1 class="h2 fw-bold">Cập nhật sản phẩm</h1>
+            <p class="text-muted mb-0">Chỉnh sửa thông tin chi tiết sản phẩm cũ</p>
         </div>
     </div>
 
@@ -25,6 +25,8 @@
             <form th:action="@{/admin/product/save}"
                   th:object="${product}"
                   method="post">
+
+                <input type="hidden" th:field="*{id}"/>
 
                 <div class="mb-4">
                     <label class="form-label fw-semibold">
@@ -139,7 +141,7 @@
 
                 <div class="d-flex gap-2 mt-4">
                     <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-save"></i> Thêm sản phẩm
+                        <i class="bi bi-save"></i> Cập nhật
                     </button>
                     <a th:href="@{/admin/products}" class="btn btn-outline-secondary">Quay lại</a>
                 </div>

@@ -2,6 +2,7 @@ package com.example.LVTN.controller.user;
 
 import com.example.LVTN.entity.Order;
 import com.example.LVTN.security.VNPayConfig;
+import com.example.LVTN.service.EmailService;
 import com.example.LVTN.service.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class PaymentController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private EmailService emailService;
 
     @Value("${vnp.tmn.code}") private String vnp_TmnCode;
     @Value("${vnp.hash.secret}") private String vnp_HashSecret;
@@ -138,7 +142,26 @@ public class PaymentController {
         try {
             Long orderId = Long.parseLong(orderIdStr);
             if ("00".equals(responseCode)) {
+                // 1. Cập nhật trạng thái thanh toán thành công xuống Database
                 orderService.updatePaymentStatus(orderId, "PAID");
+
+                // =========================================================================
+                // ĐOẠN THÊM MỚI: TIẾN HÀNH GỬI EMAIL HÓA ĐƠN CHI TIẾT KHI VNPAY THÀNH CÔNG
+                // =========================================================================
+                try {
+                    // Lấy ra thông tin đơn hàng đầy đủ từ database sau khi đã update trạng thái PAID
+                    Order completedOrder = orderService.findById(orderId);
+                    if (completedOrder != null) {
+                        // Truyền nguyên đối tượng Order vào để Service tự động bóc tách và vẽ bảng sản phẩm HTML
+                        emailService.sendOrderConfirmationEmail(completedOrder);
+                    }
+                } catch (Exception mailException) {
+                    // Bao bọc try-catch riêng để nếu mạng nghẽn không gửi được mail,
+                    // khách vẫn được chuyển hướng sang trang success bình thường, không bị đứng web.
+                    System.err.println(">>> Lỗi hệ thống gửi mail (VNPAY): " + mailException.getMessage());
+                }
+                // =========================================================================
+
                 request.getSession().removeAttribute("cart");
                 return "redirect:/checkout/success?orderId=" + orderId;
             } else {

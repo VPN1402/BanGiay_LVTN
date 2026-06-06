@@ -15,4 +15,7 @@ public interface CategoryService {
     void delete(Long id);
 
     List<Category> findFeatured();
+
+
+
 }

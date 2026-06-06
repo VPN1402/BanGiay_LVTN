@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layouts/main-layout}">
+
+<head>
+  <title>Sửa danh mục</title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div>
+      <h1 class="h2 fw-bold">Cập nhật danh mục</h1>
+      <p class="text-muted mb-0">Quản lý danh mục sản phẩm</p>
+    </div>
+  </div>
+
+  <div class="card shadow border-0 rounded-4">
+    <div class="card-body p-4">
+
+      <form th:action="@{/admin/category/save}"
+            th:object="${category}"
+            method="post">
+
+        <input type="hidden" th:field="*{id}"/>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Tên danh mục</label>
+          <input type="text"
+                 th:field="*{name}"
+                 class="form-control form-control-lg"
+                 placeholder="Nhập tên danh mục..."
+                 required>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Mô tả</label>
+          <textarea th:field="*{description}"
+                    class="form-control"
+                    rows="5"
+                    placeholder="Nhập mô tả danh mục...">
+                    </textarea>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Ảnh danh mục</label>
+          <input type="text"
+                 th:field="*{thumbnail}"
+                 class="form-control"
+                 placeholder="https://example.com/image.jpg">
+        </div>
+
+        <div class="form-check mb-4">
+          <input class="form-check-input"
+                 type="checkbox"
+                 th:field="*{featured}">
+          <label class="form-check-label fw-semibold">
+            Hiển thị ở danh mục nổi bật
+          </label>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-save"></i> Cập nhật
+          </button>
+          <a th:href="@{/admin/categories}" class="btn btn-outline-secondary">Quay lại</a>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

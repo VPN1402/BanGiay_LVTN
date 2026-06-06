@@ -9,7 +9,6 @@
 <main layout:fragment="content" class="py-5 bg-light">
     <div class="container">
         <div class="row">
-            <!-- User Sidebar -->
             <div class="col-lg-3 mb-4 mb-lg-0">
                 <div class="bg-white p-4 rounded shadow-sm text-center">
                     <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
@@ -25,49 +24,64 @@
                 </div>
             </div>
 
-            <!-- Order History -->
             <div class="col-lg-9">
                 <h4 class="fw-bold mb-4">Lịch sử đơn hàng</h4>
 
                 <div th:if="${#lists.isEmpty(orders)}" class="alert alert-info">Bạn chưa có đơn hàng nào.</div>
 
-                <!-- Danh sách đơn hàng -->
                 <div th:each="order : ${orders}" class="bg-white p-4 rounded shadow-sm mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <span class="fw-bold">Mã đơn: #[[${order.id}]]</span>
+                            <span class="fw-bold" th:text="'Mã đơn: #' + ${order.id}">Mã đơn</span>
                             <span class="text-muted small ms-2" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
                         </div>
-                        <!-- Trạng thái thanh toán -->
                         <span class="badge"
                               th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success' : 'bg-danger'}"
                               th:text="${order.paymentStatus == 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}"></span>
 
-                        <!-- Trạng thái đơn hàng -->
                         <span class="badge bg-primary" th:text="${order.orderStatus}">Trạng thái</span>
                     </div>
 
                     <div th:each="item : ${order.orderItems}" class="d-flex align-items-center mb-3">
-                        <img th:src="@{${item.product.thumbnail}}" class="rounded me-3" style="width: 80px; height: 80px; object-fit: cover;" alt="Product">
+                        <img th:src="@{${item.product.thumbnail}}" class="rounded me-3" style="width: 80px; height: 80px; object-fit: cover;" alt="Product" />
                         <div>
                             <h6 class="mb-1" th:text="${item.product.name}"></h6>
                             <div class="text-muted small" th:text="'Size: ' + ${item.size} + ' | Số lượng: ' + ${item.quantity}"></div>
-                            <div class="text-primary fw-bold" th:text="${#numbers.formatDecimal(item.price, 0, 'POINT', 0, 'COMMA')} + 'đ'"></div>
+                            <div class="text-primary fw-bold" th:text="${#numbers.formatDecimal(item.price, 1, 'POINT', 0, 'COMMA')} + 'đ'"></div>
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                        <div class="text-muted small">Tổng tiền: <span class="fs-5 fw-bold text-dark ms-1" th:text="${#numbers.formatDecimal(order.finalTotal, 0, 'POINT', 0, 'COMMA')} + 'đ'"></span></div>
+                        <div class="text-muted small">
+                            Tổng tiền: <span class="fs-5 fw-bold text-dark ms-1"
+                                             th:text="${order.finalTotal != null ? #numbers.formatDecimal(order.finalTotal, 1, 'POINT', 0, 'COMMA') + 'đ' : '0đ'}"></span>
+                        </div>
 
-                        <!-- Nút xác nhận nhận hàng: Chỉ hiện khi đơn hàng đang giao -->
                         <div>
-                            <form th:if="${order.orderStatus == 'SHIPPING'}" th:action="@{/order/confirm-received}" method="post">
-                                <input type="hidden" name="orderId" th:value="${order.id}">
-                                <button type="submit" class="btn btn-success btn-sm">Xác nhận đã nhận hàng</button>
+                            <form th:if="${order.orderStatus != null and order.orderStatus == 'PENDING'}"
+                                  th:action="@{/order/cancel}"
+                                  method="post"
+                                  class="d-inline">
+                                <input type="hidden" name="orderId" th:value="${order.id}" />
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')">
+                                    Hủy đơn
+                                </button>
                             </form>
-                            <a th:href="@{'/order-details/' + ${order.id}}" class="btn btn-outline-secondary btn-sm ms-2">Xem chi tiết</a>
+
+                            <form th:if="${order.orderStatus != null and order.orderStatus == 'SHIPPING'}"
+                                  th:action="@{/order/confirm-received}"
+                                  method="post"
+                                  class="d-inline ms-2">
+                                <input type="hidden" name="orderId" th:value="${order.id}" />
+                                <button type="submit" class="btn btn-success btn-sm">Đã nhận hàng</button>
+                            </form>
+
+                            <a th:href="@{'/order-details/' + ${order.id}}"
+                               class="btn btn-outline-secondary btn-sm ms-2">Xem chi tiết</a>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>

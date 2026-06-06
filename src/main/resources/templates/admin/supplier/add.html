@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org"
-      layout:decorate="~{admin/layouts/main-layout}"
-      xmlns:layout="http://www.w3.org/1999/xhtml">
+      layout:decorate="~{admin/layouts/main-layout}" xmlns:layout="http://www.w3.org/1999/xhtml">
 <head>
-    <title th:text="${supplier.id != null} ? 'Cập Nhật Nhà Cung Cấp Giày' : 'Thêm Nhà Cung Cấp Giày 新'"></title>
+    <title>Thêm Nhà Cung Cấp Giày</title>
 </head>
 <body>
 <div layout:fragment="content" class="container py-4" style="max-width: 750px;">
@@ -15,31 +14,41 @@
         </a>
     </div>
 
-    <h2 class="fw-bold mb-4" th:text="${supplier.id != null} ? '⚙️ Chỉnh Sửa Đối Tác Cung Cấp' : '➕ Đăng Ký Nhà Cung Cấp Giày'"></h2>
+    <h2 class="fw-bold mb-4">➕ Đăng Ký Nhà Cung Cấp Giày</h2>
 
     <div class="card p-4 shadow-sm border-0 rounded-3">
-        <form th:action="@{/admin/supplier/save}" method="post" th:object="${supplier}" class="needs-validation" novalidate>
 
-            <input type="hidden" th:field="*{id}" />
-            <input type="hidden" th:field="*{createdAt}" th:if="${supplier.id != null}" />
+        <form th:action="@{/admin/supplier/save}" method="post" th:object="${supplier}">
 
             <div class="row g-3">
                 <div class="col-md-12">
                     <label class="form-label fw-semibold">Tên Nhà cung cấp / Xưởng giày <span class="text-danger">*</span></label>
-                    <input type="text" th:field="*{name}" class="form-control" placeholder="Ví dụ: Tổng kho sỉ giày Adidas miền Nam, Xưởng Giày Thể Thao ABC..." required maxlength="255">
-                    <div class="invalid-feedback">Vui lòng nhập tên nhà cung cấp hoặc tên xưởng sỉ.</div>
+                    <input type="text"
+                           th:field="*{name}"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''"
+                           placeholder="Ví dụ: Tổng kho sỉ giày Adidas miền Nam...">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">Số điện thoại liên hệ <span class="text-danger">*</span></label>
-                    <input type="tel" th:field="*{phone}" class="form-control" placeholder="Ví dụ: 0901234567" pattern="[0-9]{10,11}" required>
-                    <div class="invalid-feedback">Số điện thoại bắt buộc và phải có từ 10 - 11 chữ số.</div>
+                    <input type="tel"
+                           th:field="*{phone}"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid' : ''"
+                           placeholder="Ví dụ: 0901234567">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">Email kinh doanh (nếu có)</label>
-                    <input type="email" th:field="*{email}" class="form-control" placeholder="Ví dụ: hoptac@xuonggiaythethao.com">
-                    <div class="invalid-feedback">Định dạng Email đối tác không hợp lệ.</div>
+                    <input type="email"
+                           th:field="*{email}"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                           placeholder="Ví dụ: hoptac@xuonggiaythethao.com">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                 </div>
 
                 <div class="col-md-12">
@@ -50,28 +59,10 @@
 
             <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
                 <a th:href="@{/admin/suppliers}" class="btn btn-light px-4">Hủy bỏ</a>
-                <button type="submit" class="btn btn-primary px-4">
-                    <span th:text="${supplier.id != null} ? 'Cập Nhật' : 'Lưu Đối Tác'"></span>
-                </button>
+                <button type="submit" class="btn btn-primary px-4">Lưu Đối Tác</button>
             </div>
         </form>
     </div>
 </div>
-
-<script layout:fragment="script">
-    (function () {
-        'use strict'
-        var forms = document.querySelectorAll('.needs-validation')
-        Array.prototype.slice.call(forms).forEach(function (form) {
-            form.addEventListener('submit', function (event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                }
-                form.classList.add('was-validated')
-            }, false)
-        })
-    })()
-</script>
 </body>
 </html>

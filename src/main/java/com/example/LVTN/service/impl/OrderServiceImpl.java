@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class OrderServiceImpl implements OrderService { // 2. THÊM "implements OrderService" Ở ĐÂY
+public class OrderServiceImpl implements OrderService {
 
     @Autowired private OrderRepository orderRepository;
     @Autowired private CartRepository cartRepository;
@@ -27,12 +27,12 @@ public class OrderServiceImpl implements OrderService { // 2. THÊM "implements 
         return orderRepository.findAll();
     }
 
-    // BẮT BUỘC CÓ @Transactional để chống lỗi hụt dữ liệu
-    @Override // 3. THÊM @Override CHO HÀM ĐẶT HÀNG
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Order placeOrder(User currentUser, CheckoutRequest request) {
 
-        // 1. Lấy giỏ hàng của user
+
         Cart cart = cartRepository.findByUserId(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("Giỏ hàng không tồn tại!"));
 
@@ -40,7 +40,7 @@ public class OrderServiceImpl implements OrderService { // 2. THÊM "implements 
             throw new RuntimeException("Giỏ hàng đang trống, không thể đặt hàng!");
         }
 
-        // 2. Khởi tạo đơn hàng (Order)
+       // khởi tạo đơn hàng
         Order order = new Order();
         order.setUser(currentUser);
         order.setReceiverName(request.getReceiverName());
@@ -50,15 +50,15 @@ public class OrderServiceImpl implements OrderService { // 2. THÊM "implements 
         order.setPaymentMethod(request.getPaymentMethod());
         order.setOrderStatus(OrderStatus.PENDING.name());
 
-        // Trạng thái thanh toán mặc định là UNPAID (Chưa thanh toán)
+        //mặc định là UNPAID
         order.setPaymentStatus(PaymentStatus.UNPAID.name());
 
         BigDecimal totalAmount = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
 
-        // 3. Xử lý từng sản phẩm trong giỏ hàng
+
         for (CartItem cartItem : cart.getItems()) {
-            // -- NGHIỆP VỤ: KIỂM TRA TỒN KHO THỰC TẾ --
+            // ktra tồn
             ProductSize ps = productSizeRepository.findByProductIdAndSize(
                     cartItem.getProduct().getId(),
                     String.valueOf(cartItem.getSize())
@@ -69,7 +69,7 @@ public class OrderServiceImpl implements OrderService { // 2. THÊM "implements 
                         + cartItem.getSize() + " không đủ số lượng. Kho chỉ còn: " + ps.getQuantity());
             }
 
-            // -- NGHIỆP VỤ: TRỪ KHO --
+            // trừ kho
             ps.setQuantity(ps.getQuantity() - cartItem.getQuantity());
             productSizeRepository.save(ps);
 
@@ -83,12 +83,12 @@ public class OrderServiceImpl implements OrderService { // 2. THÊM "implements 
 
             orderItems.add(orderItem);
 
-            // Tính tổng tiền = Giá * Số lượng
+            // tongtien = gia * sl
             BigDecimal lineTotal = cartItem.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
             totalAmount = totalAmount.add(lineTotal);
         }
 
-        // 4. Lưu tổng tiền đơn hàng (Tạm tính)
+
         order.setTotalAmount(totalAmount);
 
         // ĐỒNG BỘ GIAO DIỆN: Tính toán số tiền cuối cùng (Cộng thêm 30k ship cố định từ giao diện HTML)
@@ -104,18 +104,18 @@ public class OrderServiceImpl implements OrderService { // 2. THÊM "implements 
         return savedOrder;
     }
 
-    // ==================== 4. BỔ SUNG 2 HÀM CÒN THIẾU DƯỚI ĐÂY ====================
+
 
     @Override
     public Order findById(Long id) {
-        // Tìm đơn hàng theo ID phục vụ cho Controller kiểm tra thông tin, nếu không thấy trả về null
+
         return orderRepository.findById(id).orElse(null);
     }
 
     @Override
     @Transactional
     public void updatePaymentStatus(Long orderId, String status) {
-        // Tìm kiếm đơn hàng cần cập nhật trạng thái
+
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với ID: " + orderId));
 
@@ -124,13 +124,13 @@ public class OrderServiceImpl implements OrderService { // 2. THÊM "implements 
 
         // Nếu thanh toán thành công (PAID), bạn có thể đổi trạng thái xử lý đơn hàng nếu muốn
         if ("PAID".equals(status)) {
-            // Ví dụ: Đơn đã thanh toán thành công thì giữ nguyên chờ duyệt hoặc chuyển trạng thái khác
+
             order.setOrderStatus(OrderStatus.PENDING.name());
         } else if ("FAILED".equals(status)) {
             order.setOrderStatus(OrderStatus.CANCELLED.name()); // Thanh toán lỗi thì tự động hủy đơn
         }
 
-        orderRepository.save(order); // Lưu cập nhật vào Cơ sở dữ liệu
+        orderRepository.save(order);
     }
     // ============================================================================
     @Override
@@ -148,7 +148,7 @@ public class OrderServiceImpl implements OrderService { // 2. THÊM "implements 
         order.setOrderStatus(orderStatus);
         order.setPaymentStatus(paymentStatus);
 
-        // 3. Lưu lại vào DB
+
         orderRepository.save(order);
     }
     @Override
@@ -160,4 +160,41 @@ public class OrderServiceImpl implements OrderService { // 2. THÊM "implements 
         order.setOrderStatus(newStatus);
         orderRepository.save(order);
     }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void cancelOrder(Long orderId, Long userId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+
+        if (!"PENDING".equals(order.getOrderStatus())) {
+            throw new RuntimeException("Đơn hàng này không thể hủy!");
+        }
+
+
+        if (!order.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Bạn không có quyền hủy đơn hàng này!");
+        }
+
+
+        for (OrderItem item : order.getOrderItems()) {
+            ProductSize ps = productSizeRepository.findByProductIdAndSize(
+                            item.getProduct().getId(), item.getSize())
+                    .orElseThrow(() -> new RuntimeException("Sản phẩm không còn trong kho"));
+
+            ps.setQuantity(ps.getQuantity() + item.getQuantity());
+            productSizeRepository.save(ps);
+        }
+
+        order.setOrderStatus("CANCELLED");
+
+        if ("PAID".equals(order.getPaymentStatus())) {
+            order.setPaymentStatus("REFUND_PENDING");
+        }
+        orderRepository.save(order);
+    }
+
+
 }

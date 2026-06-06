@@ -1,6 +1,7 @@
 package com.example.LVTN.service.impl;
 
 import com.example.LVTN.entity.Category;
+import com.example.LVTN.entity.Product;
 import com.example.LVTN.repository.CategoryRepository;
 import com.example.LVTN.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,4 +38,5 @@ public class CategoryServiceImpl implements CategoryService {
 
         return categoryRepository.findByFeaturedTrue();
     }
+
 }

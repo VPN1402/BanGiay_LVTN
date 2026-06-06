@@ -1,5 +1,6 @@
 package com.example.LVTN.controller.user;
 
+import com.example.LVTN.entity.Category;
 import com.example.LVTN.entity.Product;
 import com.example.LVTN.service.CategoryService;
 import com.example.LVTN.service.ProductService;
@@ -9,6 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.util.List;
 
 @Controller
@@ -22,8 +25,8 @@ public class CategoryController {
 
     @GetMapping("/category")
     public String getAllCategories(Model model, HttpServletRequest request) {
+        model.addAttribute("products",productService.findAll());
         model.addAttribute("categories", categoryService.findAll());
-
         model.addAttribute("currentUri", request.getRequestURI());
 
         return "user/category/category-list";
@@ -42,4 +45,6 @@ public class CategoryController {
 
         return "user/product/product-list";
     }
+
+
 }

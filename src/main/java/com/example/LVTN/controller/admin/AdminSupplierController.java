@@ -1,9 +1,11 @@
 package com.example.LVTN.controller.admin;
 import com.example.LVTN.entity.Supplier;
 import com.example.LVTN.service.SupplierService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -29,27 +31,21 @@ public class AdminSupplierController {
     }
 
     @PostMapping("/supplier/save")
-    public String saveSupplier(@ModelAttribute("supplier") Supplier supplier,
-                               org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
-        try {
-            supplierService.save(supplier);
-            redirectAttributes.addFlashAttribute("successMessage", "Lưu thông tin nhà cung cấp giày thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Đã xảy ra sự cố dữ liệu, vui lòng kiểm tra lại!");
+    public String saveSupplier(@Valid @ModelAttribute("supplier") Supplier supplier,
+                               BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            // Nếu có lỗi, check xem là đang thêm mới hay sửa để trả về đúng file HTML tĩnh
+            return supplier.getId() == null ? "admin/supplier/add" : "admin/supplier/update";
         }
+        supplierService.save(supplier);
         return "redirect:/admin/suppliers";
     }
 
     @GetMapping("/supplier/edit/{id}")
-    public String showEditForm(@PathVariable("id") Long id, Model model,
-                               org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String showEditForm(@PathVariable("id") Long id, Model model) {
         Supplier supplier = supplierService.findById(id);
-        if (supplier == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không tồn tại dữ liệu nhà cung cấp này!");
-            return "redirect:/admin/suppliers";
-        }
         model.addAttribute("supplier", supplier);
-        return "admin/supplier/add";
+        return "admin/supplier/update";
     }
 
     @GetMapping("/supplier/delete/{id}")

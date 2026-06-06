@@ -28,7 +28,7 @@
 
                         <div class="col-12">
                             <label class="form-label fw-medium">Số điện thoại</label>
-                            <input type="tel" th:field="*{receiverPhone}" class="form-control" placeholder="0901234567" required>
+                            <input type="tel" th:field="*{receiverPhone}" class="form-control" placeholder="0901234567" maxlength="10" pattern="0[0-9]{9}" title="phai la so" required>
                         </div>
 
                         <div class="col-12">

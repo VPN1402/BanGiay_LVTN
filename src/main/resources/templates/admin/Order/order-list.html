@@ -41,19 +41,19 @@
                         <td th:text="${order.receiverName}"></td>
 
                         <td class="fw-bold text-danger">
-                            <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}"></span> đ
+                            <span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'POINT', 0, 'COMMA')}"></span> đ
                         </td>
 
                         <td>
-                            <span class="badge"
-                                  th:classappend="${order.orderStatus == 'PENDING' ? 'bg-warning' : (order.orderStatus == 'SHIPPING' ? 'bg-info' : 'bg-success')}"
-                                  th:text="${order.orderStatus}"></span>
+        <span class="badge"
+              th:classappend="${order.orderStatus == 'PENDING' ? 'bg-warning text-dark' : (order.orderStatus == 'SHIPPING' ? 'bg-info' : (order.orderStatus == 'CANCELLED' ? 'bg-danger' : 'bg-success'))}"
+              th:text="${order.orderStatus == 'PENDING' ? 'Chờ duyệt' : (order.orderStatus == 'SHIPPING' ? 'Đang giao' : (order.orderStatus == 'CANCELLED' ? 'Đã hủy' : 'Hoàn thành'))}"></span>
                         </td>
 
                         <td>
-                            <span class="badge"
-                                  th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success' : 'bg-secondary'}"
-                                  th:text="${order.paymentStatus == 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}"></span>
+        <span class="badge"
+              th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success' : (order.paymentStatus == 'REFUND_PENDING' ? 'bg-warning text-dark' : (order.paymentStatus == 'REFUNDED' ? 'bg-secondary' : 'bg-dark'))}"
+              th:text="${order.paymentStatus == 'PAID' ? 'Đã thanh toán' : (order.paymentStatus == 'REFUND_PENDING' ? 'Chờ hoàn tiền' : (order.paymentStatus == 'REFUNDED' ? 'Đã hoàn tiền' : 'Chưa thanh toán'))}"></span>
                         </td>
 
                         <td class="text-center">
@@ -61,6 +61,17 @@
                                class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-eye"></i> Xem chi tiết
                             </a>
+
+                            <form th:if="${order.paymentStatus == 'REFUND_PENDING'}"
+                                  th:action="@{/admin/orders/confirm-refund}"
+                                  method="post"
+                                  class="d-inline ms-2">
+                                <input type="hidden" name="orderId" th:value="${order.id}" />
+                                <button type="submit" class="btn btn-sm btn-success"
+                                        onclick="return confirm('Bạn đã chuyển khoản trả tiền cho khách và muốn xác nhận ĐÃ HOÀN TIỀN cho đơn này?')">
+                                    <i class="bi bi-check2-circle"></i> Xác nhận đã hoàn tiền
+                                </button>
+                            </form>
                         </td>
                     </tr>
 

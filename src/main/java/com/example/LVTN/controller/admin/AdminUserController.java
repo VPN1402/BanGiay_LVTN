@@ -50,7 +50,7 @@ public class AdminUserController {
         User user = userService.findById(id);
         model.addAttribute("user", user);
         model.addAttribute("roles", roleService.findAll());
-        return "admin/user/add";
+        return "admin/user/update";
     }
 
     @GetMapping("/user/delete/{id}")

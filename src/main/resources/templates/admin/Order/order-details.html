@@ -42,6 +42,9 @@
                         <select name="paymentStatus" class="form-select">
                             <option value="UNPAID" th:selected="${order.paymentStatus == 'UNPAID'}">Chưa thanh toán</option>
                             <option value="PAID" th:selected="${order.paymentStatus == 'PAID'}">Đã thanh toán</option>
+                            <option value="REFUND_PENDING" th:selected="${order.paymentStatus == 'REFUND_PENDING'}">Chờ Hoàn Tiền</option>
+                            <option value="REFUNDED" th:selected="${order.paymentStatus == 'REFUNDED'}">Đã Hoàn Tiền</option>
+
                         </select>
                     </div>
 
