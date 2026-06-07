@@ -195,6 +195,10 @@ public class OrderServiceImpl implements OrderService {
         }
         orderRepository.save(order);
     }
-
+    @Override
+    public List<Order> findByUser(User user) {
+        // Gọi xuống Repository để tìm đơn hàng theo người dùng
+        return orderRepository.findByUser(user);
+    }
 
 }

@@ -5,6 +5,8 @@ import com.example.LVTN.entity.Product;
 import com.example.LVTN.repository.CategoryRepository;
 import com.example.LVTN.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,6 +39,10 @@ public class CategoryServiceImpl implements CategoryService {
     public List<Category> findFeatured() {
 
         return categoryRepository.findByFeaturedTrue();
+    }
+
+    public Page<Category> findAll(Pageable pageable){
+        return categoryRepository.findAll(pageable);
     }
 
 }

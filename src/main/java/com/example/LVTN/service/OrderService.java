@@ -25,4 +25,5 @@ public interface OrderService {
 
     void cancelOrder(Long orderId, Long userId);
 
+    List<Order> findByUser(User user);
 }

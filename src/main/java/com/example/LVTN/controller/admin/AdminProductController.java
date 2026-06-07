@@ -6,6 +6,9 @@ import com.example.LVTN.service.BrandService;
 import com.example.LVTN.service.CategoryService;
 import com.example.LVTN.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.BindingResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,8 +31,13 @@ public class AdminProductController {
 
     // --- PRODUCTS ---
     @GetMapping("/products")
-    public String manageProducts(Model model) {
-        model.addAttribute("products", productService.findAll());
+    public String manageProducts(@RequestParam(defaultValue = "0") int page, Model model) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<Product> productPage = productService.findAll(pageable);
+
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
         return "admin/product/list";
     }
 
@@ -71,8 +79,14 @@ public class AdminProductController {
 
     // --- CATEGORIES ---
     @GetMapping("/categories")
-    public String manageCategories(Model model) {
-        model.addAttribute("categories", categoryService.findAll());
+    public String manageCategories(@RequestParam(defaultValue = "0") int page,Model model) {
+        Pageable pageable = PageRequest.of(page,10);
+        // lấy dlieu theo trang
+        Page<Category> categoryPage= categoryService.findAll(pageable);
+        //do ra gd
+        model.addAttribute("categories", categoryPage.getContent());
+        model.addAttribute("currentPage",page);
+        model.addAttribute("totalPages",categoryPage.getTotalPages());
         return "/admin/Category/list";
     }
 
@@ -94,19 +108,6 @@ public class AdminProductController {
 
         return "redirect:/admin/categories";
     }
-//    @PostMapping("/product/save")
-//    public String saveProduct(@Valid @ModelAttribute("product") Product product,
-//                              BindingResult bindingResult,
-//                              Model model) {
-//        if (bindingResult.hasErrors()) {
-//            model.addAttribute("categories", categoryService.findAll());
-//            model.addAttribute("brands", brandService.findAll());
-//            return "admin/product/add";
-//        }
-//        productService.save(product);
-//        return "redirect:/admin/products";
-//    }
-//
 
     @GetMapping("/category/edit/{id}")
     public String editCategory(@PathVariable Long id, Model model) {

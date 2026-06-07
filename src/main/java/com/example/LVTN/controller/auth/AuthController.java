@@ -1,7 +1,9 @@
 package com.example.LVTN.controller.auth;
 
+import com.example.LVTN.entity.User;
 import com.example.LVTN.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +22,33 @@ public class AuthController {
     public String loginPage(Model model, HttpServletRequest request) {
         model.addAttribute("currentUri", request.getRequestURI());
         return "auth/login";
+    }
+    @PostMapping("/auth/login")
+    public String handleLogin(
+            @RequestParam String email,
+            @RequestParam String password,
+            HttpSession session, // Nhận đối tượng session từ Spring để cất dữ liệu
+            RedirectAttributes redirectAttributes) {
+
+        try {
+
+            User user = userService.checkLogin(email, password);
+
+            if (user != null) {
+                // lưu vào session với key loggedInUser
+                session.setAttribute("loggedInUser", user);
+
+
+                return "redirect:/";
+            } else {
+                redirectAttributes.addFlashAttribute("errorMsg", "Email hoặc mật khẩu không chính xác!");
+                return "redirect:/auth/login";
+            }
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Đăng nhập thất bại: " + e.getMessage());
+            return "redirect:/auth/login";
+        }
     }
 
 

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 public class OrderController {
@@ -93,10 +94,21 @@ public class OrderController {
 
     @GetMapping("/order-history")
     public String showOrderHistory(Model model) {
-        User user = cartService.getLoggedInUser();
-        if (user == null) return "redirect:/login";
+        // 1. Lấy Email của người đang đăng nhập từ Spring Security
+        org.springframework.security.core.Authentication authentication =
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
 
-        model.addAttribute("orders", orderService.getOrdersByUserId(user.getId()));
+        // 2. Tìm đối tượng User đầy đủ dưới Database bằng Email
+        User user = userService.findByEmail(currentEmail);
+
+        // 3. NẠP ĐỐI TƯỢNG USER VÀO MODEL (Bước quyết định)
+        model.addAttribute("user", user);
+
+        // 4. Lấy danh sách đơn hàng (Code cũ của bạn)
+        List<Order> orders = orderService.findByUser(user);
+        model.addAttribute("orders", orders);
+
         return "user/order/order-history";
     }
 

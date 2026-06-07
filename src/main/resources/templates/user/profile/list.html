@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{user/layouts/main-layout}">
+<head>
+    <title>Hồ Sơ Của Tôi - Kicks Store</title>
+</head>
+<body>
+<main layout:fragment="content" class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-lg-3 mb-4 mb-lg-0">
+                <div class="bg-white p-4 rounded shadow-sm text-center">
+                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                         style="width: 80px; height: 80px; font-size: 2rem;"
+                         th:text="${#strings.substring(user.fullName, 0, 1).toUpperCase()}">
+                        U
+                    </div>
+                    <h5 class="fw-bold mb-1" th:text="${user.fullName}">User Name</h5>
+
+                    <div class="mb-3">
+                        <span class="badge bg-light text-secondary border small"
+                              th:text="${user.role != null ? user.role.roleName : 'ROLE_USER'}">ROLE_USER</span>
+                    </div>
+
+                    <div class="nav flex-column nav-pills text-start mt-4">
+                        <a class="nav-link active bg-primary-custom text-white" href="/profile">
+                            <i class="fa-regular fa-user me-2"></i> Thông tin tài khoản
+                        </a>
+                        <a class="nav-link text-dark" href="/order-history">
+                            <i class="fa-solid fa-box-open me-2"></i> Lịch sử đơn hàng
+                        </a>
+                        <a class="nav-link text-dark" href="/logout">
+                            <i class="fa-solid fa-right-from-bracket me-2"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="bg-white p-4 rounded shadow-sm">
+                    <h4 class="fw-bold mb-1">Hồ sơ của tôi</h4>
+                    <p class="text-muted small mb-4">Quản lý thông tin cá nhân của bạn</p>
+
+                    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show small" role="alert">
+                        <i class="fa-solid fa-circle-check me-1"></i> Cập nhật thông tin tài khoản thành công!
+                        <button type="button" class="btn-close p-2.5" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <form th:action="@{/profile/update}" th:object="${user}" method="post">
+                        <div class="row g-3">
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-muted small">Địa chỉ Email</label>
+                                <input type="email" th:field="*{email}" class="form-control bg-light text-secondary" readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Họ và tên</label>
+                                <input type="text" th:field="*{fullName}" class="form-control" placeholder="Nhập họ và tên...">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Số điện thoại</label>
+                                <input type="text" th:field="*{phone}" class="form-control" placeholder="Nhập số điện thoại...">
+                            </div>
+
+                            <div class="col-12 text-end pt-3 border-top">
+                                <button type="submit" class="btn btn-dark btn-sm px-4 fw-semibold">
+                                    <i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi
+                                </button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+</body>
+</html>
