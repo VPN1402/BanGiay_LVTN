@@ -47,12 +47,12 @@ public class OrderController {
         return "user/order/checkout";
     }
 
+    // Khúc này trong OrderController.java sửa lại như sau để hết sạch lỗi:
     @PostMapping("/checkout/process")
     public String processCheckout(@ModelAttribute CheckoutRequest checkoutRequest,
                                   Principal principal,
                                   RedirectAttributes redirectAttributes) {
         try {
-
             if (principal == null) {
                 redirectAttributes.addFlashAttribute("error", "Vui lòng đăng nhập trước khi thực hiện thanh toán!");
                 return "redirect:/login";
@@ -60,6 +60,7 @@ public class OrderController {
 
             User currentUser = userService.findByEmail(principal.getName());
 
+            // Trong hàm placeOrder bên trên đã tự động tính toán gán độ ưu tiên (Priority) rồi, không cần gọi lưu thủ công ở đây nữa!
             Order newOrder = orderService.placeOrder(currentUser, checkoutRequest);
 
             // Phân luồng Thanh Toán
@@ -68,19 +69,16 @@ public class OrderController {
             }
 
             try {
-                // Chỉ cần truyền duy nhất thực thể newOrder vào, mọi việc bóc tách thông tin cứ để EmailService lo
                 emailService.sendOrderConfirmationEmail(newOrder);
             } catch (Exception mailException) {
                 System.err.println(">>> Lỗi hệ thống gửi mail hóa đơn (COD): " + mailException.getMessage());
             }
-
 
             // Nếu là COD, báo thành công
             redirectAttributes.addFlashAttribute("success", "Đặt hàng thành công! Mã đơn của bạn là: #" + newOrder.getId());
             return "redirect:/checkout/success";
 
         } catch (RuntimeException e) {
-            // Lỗi hết hàng hoặc giỏ hàng trống sẽ văng ra đây
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/checkout";
         }
@@ -166,5 +164,67 @@ public class OrderController {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
         return "redirect:/admin/orders";
+    }
+    // THÊM VÀO CUỐI FILE ORDERCONTROLLER.JAVA CỦA BẠN
+
+    @PostMapping("/admin/warehouse/submit-export/{orderId}")
+    public String submitExportWarehouse(@PathVariable Long orderId,
+                                        Principal principal,
+                                        RedirectAttributes redirectAttributes) {
+        try {
+            // 1. Kiểm tra nếu nhân viên chưa đăng nhập (hết hạn session)
+            if (principal == null) {
+                redirectAttributes.addFlashAttribute("error", "Phiên làm việc đã hết hạn, vui lòng đăng nhập lại!");
+                return "redirect:/login";
+            }
+
+            // 2. Lấy tên tài khoản (Email/Username) của nhân viên/admin đang bấm nút thực hiện
+            String usernameNhanVien = principal.getName();
+
+            // 3. Gọi xuống tầng Service để thực hiện kiểm tra thực tế & trừ kho
+            String result = orderService.submitXuatKho(orderId, usernameNhanVien);
+
+            // 4. Phân loại kết quả trả về để hiển thị thông báo ra màn hình Admin
+            if ("SUCCESS".equals(result)) {
+                redirectAttributes.addFlashAttribute("success",
+                        "📦 Xác nhận xuất kho thành công! Hệ thống đã tự động trừ kho thực tế và chuyển trạng thái đơn hàng thành [ĐANG GIAO].");
+            } else if ("FAILED_OUT_OF_STOCK".equals(result)) {
+                redirectAttributes.addFlashAttribute("error",
+                        "⚠️ XUẤT KHO THẤT BẠI: Trong lúc chờ duyệt, sản phẩm thực tế trong kho đã bị hụt hoặc hết hàng! Đơn hàng đã tự động chuyển về trạng thái [Hết hàng kho].");
+            }
+
+        } catch (RuntimeException e) {
+            // Hứng các lỗi runtime thông thường như không tìm thấy đơn, lỗi logic hệ thống...
+            redirectAttributes.addFlashAttribute("error", "Lỗi xử lý: " + e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi hệ thống không xác định: " + e.getMessage());
+        }
+
+        // Sau khi xử lý xong, chuyển hướng quay trở lại đúng trang chi tiết đơn hàng đó để xem kết quả cập nhật
+        return "redirect:/admin/orders/details/" + orderId;
+    }
+
+    // 1. Giao diện hiển thị khi khách quét mã QR trên hộp giày
+    @GetMapping("/order/scan/{id}")
+    public String scanQrOrderPage(@PathVariable Long id, Model model) {
+        Order order = orderService.findById(id);
+        if (order == null) {
+            model.addAttribute("error", "Mã đơn hàng không tồn tại trên hệ thống!");
+            return "user/order/scan-confirm";
+        }
+        model.addAttribute("order", order);
+        return "user/order/scan-confirm"; // Tẹo nữa mình tạo file HTML này công phu lắm
+    }
+
+    // 2. Xử lý khi khách bấm nút "Xác nhận đã nhận hàng" trên điện thoại
+    @PostMapping("/order/scan/{id}/confirm")
+    public String processQrConfirm(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            orderService.confirmReceivedByQR(id);
+            redirectAttributes.addFlashAttribute("success", "Xác nhận nhận hàng thành công! Kicks Store cảm ơn bạn.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/order/scan/" + id;
     }
 }

@@ -28,6 +28,9 @@ public class ImportReceipt {
     @Column(columnDefinition = "TEXT")
     private String note;
 
+    @Column(name = "status")
+    private String status;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

@@ -61,4 +61,12 @@ public class Product {
                 .mapToInt(ps -> ps.getQuantity() != null ? ps.getQuantity() : 0)
                 .sum();
     }
+    public int getTotalStock() {
+        if (productSizes == null || productSizes.isEmpty()) {
+            return 0;
+        }
+        return productSizes.stream()
+                .mapToInt(ProductSize::getQuantity)
+                .sum();
+    }
 }

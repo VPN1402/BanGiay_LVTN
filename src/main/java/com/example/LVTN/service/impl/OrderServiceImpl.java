@@ -5,12 +5,13 @@ import com.example.LVTN.entity.*;
 import com.example.LVTN.enums.OrderStatus;
 import com.example.LVTN.enums.PaymentStatus;
 import com.example.LVTN.repository.*;
-import com.example.LVTN.service.OrderService; // 1. THÊM IMPORT INTERFACE CỦA BẠN
+import com.example.LVTN.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,15 +24,13 @@ public class OrderServiceImpl implements OrderService {
     @Autowired private ProductSizeRepository productSizeRepository;
 
     @Override
-    public  List<Order> findAll(){
+    public List<Order> findAll() {
         return orderRepository.findAll();
     }
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Order placeOrder(User currentUser, CheckoutRequest request) {
-
 
         Cart cart = cartRepository.findByUserId(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("Giỏ hàng không tồn tại!"));
@@ -40,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Giỏ hàng đang trống, không thể đặt hàng!");
         }
 
-       // khởi tạo đơn hàng
+        // Khởi tạo đơn hàng
         Order order = new Order();
         order.setUser(currentUser);
         order.setReceiverName(request.getReceiverName());
@@ -48,30 +47,33 @@ public class OrderServiceImpl implements OrderService {
         order.setShippingAddress(request.getShippingAddress());
         order.setNote(request.getNote());
         order.setPaymentMethod(request.getPaymentMethod());
-        order.setOrderStatus(OrderStatus.PENDING.name());
-
-        //mặc định là UNPAID
+        order.setOrderStatus(OrderStatus.PENDING.name()); // Mặc định là PENDING chờ xử lý kho
         order.setPaymentStatus(PaymentStatus.UNPAID.name());
+
+        // ===== NGHIỆP VỤ: TỰ ĐỘNG PHÂN LOẠI ĐỘ ƯU TIÊN KHI TẠO ĐƠN =====
+        if ("VNPAY".equals(request.getPaymentMethod())) {
+            order.setPriority(1); // Chuyển khoản -> Ưu tiên 1 (Lên đầu hàng đợi)
+        } else {
+            order.setPriority(2); // COD -> Ưu tiên 2 (Xử lý sau)
+        }
 
         BigDecimal totalAmount = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
 
-
         for (CartItem cartItem : cart.getItems()) {
-            // ktra tồn
+            // Kiểm tra xem sản phẩm kích thước đó có tồn tại không
             ProductSize ps = productSizeRepository.findByProductIdAndSize(
                     cartItem.getProduct().getId(),
                     String.valueOf(cartItem.getSize())
             ).orElseThrow(() -> new RuntimeException("Không tìm thấy Size của sản phẩm!"));
 
+            // Chỉ cảnh báo nếu tại thời điểm đặt hàng đã hết sạch sành sanh
             if (ps.getQuantity() < cartItem.getQuantity()) {
                 throw new RuntimeException("Sản phẩm [" + cartItem.getProduct().getName() + "] size "
                         + cartItem.getSize() + " không đủ số lượng. Kho chỉ còn: " + ps.getQuantity());
             }
 
-            // trừ kho
-            ps.setQuantity(ps.getQuantity() - cartItem.getQuantity());
-            productSizeRepository.save(ps);
+            // CHÚ Ý: ĐÃ XÓA ĐOẠN TRỪ KHO TẠI ĐÂY THEO NGHIỆP VỤ CHỜ SUBMIT KHO MỚI TRỪ
 
             // Chuyển CartItem thành OrderItem
             OrderItem orderItem = new OrderItem();
@@ -83,74 +85,110 @@ public class OrderServiceImpl implements OrderService {
 
             orderItems.add(orderItem);
 
-            // tongtien = gia * sl
             BigDecimal lineTotal = cartItem.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
             totalAmount = totalAmount.add(lineTotal);
         }
 
-
         order.setTotalAmount(totalAmount);
 
-        // ĐỒNG BỘ GIAO DIỆN: Tính toán số tiền cuối cùng (Cộng thêm 30k ship cố định từ giao diện HTML)
+        // Tính toán số tiền cuối cùng (Cộng thêm 30k ship cố định)
         BigDecimal shippingFee = new BigDecimal("30000");
-        order.setFinalTotal(totalAmount.add(shippingFee)); // Thiết lập số tiền này để VNPAY lấy đi thanh toán
+        order.setFinalTotal(totalAmount.add(shippingFee));
 
-        order.setOrderItems(orderItems); // CascadeType.ALL sẽ tự lưu các orderItems
+        order.setOrderItems(orderItems);
         Order savedOrder = orderRepository.save(order);
 
-        // 5. Xóa các sản phẩm khỏi giỏ hàng
+        // Xóa các sản phẩm khỏi giỏ hàng sau khi tạo đơn thành công
         cartItemRepository.deleteAll(cart.getItems());
 
         return savedOrder;
     }
 
+    // ===== NGHIỆP VỤ MỚI: XỬ LÝ SUBMIT XUẤT KHO THỰC TẾ + CHỐNG MẤT CẮP =====
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String submitXuatKho(Long orderId, String usernameNhanVien) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
+        // 1. Kiểm tra tồn kho thực tế ngay tại thời điểm nhân viên bấm Submit
+        for (OrderItem item : order.getOrderItems()) {
+            ProductSize ps = productSizeRepository.findByProductIdAndSize(
+                    item.getProduct().getId(), item.getSize()
+            ).orElse(null);
+
+            // Nếu trong lúc chờ submit mà hàng đã bị đơn khác mua hết
+            if (ps == null || ps.getQuantity() < item.getQuantity()) {
+                order.setOrderStatus("OUT_OF_STOCK"); // Chuyển trạng thái đơn thành HẾT HÀNG để báo Admin xử lý với NCC/Khách
+                orderRepository.save(order);
+                return "FAILED_OUT_OF_STOCK";
+            }
+        }
+
+        // 2. Nếu tất cả sản phẩm đều đủ số lượng -> Tiến hành trừ kho thực tế
+        for (OrderItem item : order.getOrderItems()) {
+            ProductSize ps = productSizeRepository.findByProductIdAndSize(
+                    item.getProduct().getId(), item.getSize()
+            ).orElseThrow(() -> new RuntimeException("Lỗi hệ thống khi đối chiếu kho"));
+
+            ps.setQuantity(ps.getQuantity() - item.getQuantity());
+            productSizeRepository.save(ps);
+        }
+
+        // 3. Đổi trạng thái đơn sang đang giao và LƯU DANH TÍNH người xác nhận để chống gian lận
+        order.setOrderStatus("SHIPPING"); // Đang giao hàng
+        order.setProcessedBy(usernameNhanVien); // Lưu username nhân viên bấm nút
+        order.setProcessedAt(LocalDateTime.now()); // Lưu thời gian bấm
+        orderRepository.save(order);
+
+        return "SUCCESS";
+    }
+
+    // ===== NGHIỆP VỤ MỚI: LẤY DANH SÁCH ĐƠN HÀNG XẾP THEO ĐỘ ƯU TIÊN VÀ THỜI GIAN =====
+    @Override
+    public List<Order> getOrdersSortedByPriority() {
+        // Lấy các đơn hàng đang chờ xử lý (PENDING) và sắp xếp: Ưu tiên 1 (VNPAY) lên trước, Ưu tiên 2 (COD) sau, đơn cũ làm trước
+        return orderRepository.findByOrderStatusOrderByPriorityAscCreatedAtAsc("PENDING");
+    }
 
     @Override
     public Order findById(Long id) {
-
         return orderRepository.findById(id).orElse(null);
     }
 
     @Override
     @Transactional
     public void updatePaymentStatus(Long orderId, String status) {
-
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với ID: " + orderId));
 
-        // Gán trạng thái chuỗi "PAID" hoặc "FAILED" được trả về từ luồng VNPAY/MOMO
         order.setPaymentStatus(status);
 
-        // Nếu thanh toán thành công (PAID), bạn có thể đổi trạng thái xử lý đơn hàng nếu muốn
         if ("PAID".equals(status)) {
-
             order.setOrderStatus(OrderStatus.PENDING.name());
         } else if ("FAILED".equals(status)) {
-            order.setOrderStatus(OrderStatus.CANCELLED.name()); // Thanh toán lỗi thì tự động hủy đơn
+            order.setOrderStatus(OrderStatus.CANCELLED.name());
         }
 
         orderRepository.save(order);
     }
-    // ============================================================================
+
     @Override
     public List<Order> getOrdersByUserId(Long userId) {
         return orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
+
     @Override
     @Transactional
     public void updateOrderDetails(Long orderId, String orderStatus, String paymentStatus) {
-        // 1. Tìm đơn hàng trong DB
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với ID: " + orderId));
 
-        // 2. Cập nhật giá trị mới
         order.setOrderStatus(orderStatus);
         order.setPaymentStatus(paymentStatus);
-
-
         orderRepository.save(order);
     }
+
     @Override
     @Transactional
     public void updateOrderStatus(Long orderId, String newStatus) {
@@ -161,33 +199,21 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void cancelOrder(Long orderId, Long userId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
-
         if (!"PENDING".equals(order.getOrderStatus())) {
             throw new RuntimeException("Đơn hàng này không thể hủy!");
         }
-
 
         if (!order.getUser().getId().equals(userId)) {
             throw new RuntimeException("Bạn không có quyền hủy đơn hàng này!");
         }
 
-
-        for (OrderItem item : order.getOrderItems()) {
-            ProductSize ps = productSizeRepository.findByProductIdAndSize(
-                            item.getProduct().getId(), item.getSize())
-                    .orElseThrow(() -> new RuntimeException("Sản phẩm không còn trong kho"));
-
-            ps.setQuantity(ps.getQuantity() + item.getQuantity());
-            productSizeRepository.save(ps);
-        }
-
+        // VÌ KHI ĐẶT HÀNG CHƯA TRỪ KHO, NÊN KHI KHÁCH HỦY ĐƠN Ở TRẠNG THÁI PENDING THÌ KHÔNG CẦN CỘNG LẠI KHO NỮA
         order.setOrderStatus("CANCELLED");
 
         if ("PAID".equals(order.getPaymentStatus())) {
@@ -195,10 +221,30 @@ public class OrderServiceImpl implements OrderService {
         }
         orderRepository.save(order);
     }
+
     @Override
     public List<Order> findByUser(User user) {
-        // Gọi xuống Repository để tìm đơn hàng theo người dùng
         return orderRepository.findByUser(user);
     }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void confirmReceivedByQR(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng tương ứng với mã QR này!"));
 
+        // Chỉ cho phép hoàn thành khi đơn hàng đang ở trạng thái SHIPPING
+        if (!"SHIPPING".equals(order.getOrderStatus())) {
+            throw new RuntimeException("Đơn hàng không ở trạng thái đang giao, không thể xác nhận!");
+        }
+
+        // 1. Cập nhật trạng thái đơn hàng thành hoàn thành
+        order.setOrderStatus(OrderStatus.DELIVERED.name());
+
+        // 2. Nghiệp vụ: Nếu là đơn COD (thanh toán tiền mặt), khi nhận hàng thành công thì tự chuyển trạng thái tiền thành PAID
+        if ("COD".equals(order.getPaymentMethod())) {
+            order.setPaymentStatus(PaymentStatus.PAID.name());
+        }
+
+        orderRepository.save(order);
+    }
 }

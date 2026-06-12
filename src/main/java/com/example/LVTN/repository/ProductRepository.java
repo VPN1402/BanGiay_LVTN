@@ -12,7 +12,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByFeaturedTrue();
 
-    // CÂU LỆNH JPQL NÂNG CẤP LỌC THEO CATEGORY, BRAND, PRICE VÀ SIZE
     @Query("SELECT DISTINCT p FROM Product p " +
             "LEFT JOIN p.category c " +
             "LEFT JOIN p.brand b " +

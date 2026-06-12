@@ -28,4 +28,20 @@ public class ImportReceiptDetail {
 
     @Column(name = "subtotal", insertable = false, updatable = false)
     private BigDecimal subtotal;
+
+
+    @Column(name = "requested_quantity")
+    private Integer requestedQuantity; // SL từ file CSV
+
+    @Column(name = "approved_quantity")
+    private Integer approvedQuantity;  // SL Admin duyệt mua
+
+    @Column(name = "actual_quantity")
+    private Integer actualQuantity;    // SL thực tế kho nhận (Hàng tốt)
+
+    @Column(name = "damaged_quantity")
+    private Integer damagedQuantity;   // SL hàng lỗi, rách hộp
+
+    @Column(name = "is_approved")
+    private Boolean isApproved;        // Admin có chọn mua mã này không
 }

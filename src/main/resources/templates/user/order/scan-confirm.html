@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đơn hàng - Shoe Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body>
+
+<div class="container px-3">
+    <div class="card confirm-card p-4 bg-white text-center">
+        <div class="mb-3">
+            <span class="fs-1 text-primary"><i class="bi bi-box2-heart-fill"></i></span>
+            <h3 class="fw-bold mt-2 text-dark">Kicks Store</h3>
+            <p class="text-muted small">Hệ thống xác thực hộp giày thông minh bằng QR Code</p>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success rounded-4 py-3 mb-3">
+            <i class="bi bi-check-circle-fill fs-4 d-block mb-1"></i>
+            <span class="fw-medium small" th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger rounded-4 py-3 mb-3">
+            <i class="bi bi-exclamation-triangle-fill fs-4 d-block mb-1"></i>
+            <span class="fw-medium small" th:text="${error}"></span>
+        </div>
+
+        <div th:if="${order != null}" class="border-top border-bottom my-3 py-3 text-start bg-light rounded-4 px-3">
+            <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-receipt"></i> Thông tin vận chuyển</h6>
+            <p class="mb-1 text-muted small">Mã đơn: <strong class="text-dark" th:text="'#' + ${order.id}"></strong></p>
+            <p class="mb-1 text-muted small">Người nhận: <strong class="text-dark" th:text="${order.receiverName}"></strong></p>
+            <p class="mb-1 text-muted small">Hình thức: <span class="badge bg-dark" th:text="${order.paymentMethod}"></span></p>
+            <p class="mb-0 text-muted small">Trạng thái:
+                <span class="badge" th:classappend="${order.orderStatus == 'SHIPPING' ? 'bg-info' : 'bg-success'}"
+                      th:text="${order.orderStatus == 'SHIPPING' ? 'Đang giao hàng' : 'Đã giao thành công'}"></span>
+            </p>
+        </div>
+
+        <div th:if="${order != null and !#lists.isEmpty(order.orderItems)}" class="text-start bg-light rounded-4 px-3 py-3 mb-3">
+            <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-box-seam"></i> Sản phẩm bên trong hộp</h6>
+
+            <div th:each="item : ${order.orderItems}" class="d-flex align-items-center py-2 product-item">
+                <img th:src="@{${item.product.thumbnail}}"
+                     style="width: 55px; height: 55px; object-fit: cover;"
+                     class="rounded-3 me-3 border bg-white" alt="Ảnh sản phẩm">
+
+                <div class="flex-grow-1">
+                    <h6 class="mb-1 fw-bold text-dark small" th:text="${item.product.name}">Tên sản phẩm giày</h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small" th:text="'Size: ' + ${item.size} + ' | SL: ' + ${item.quantity}">Size: 42 | SL: 1</span>
+                        <span class="fw-bold text-dark small" th:text="${#numbers.formatDecimal(item.price, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-2">
+                <span class="fw-bold text-dark small">Tổng tiền đơn hàng:</span>
+                <span class="fw-bold text-danger fs-5" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</span>
+            </div>
+        </div>
+
+        <div th:if="${order != null and order.orderStatus == 'SHIPPING'}">
+            <p class="text-muted small px-2 mb-3">Bằng việc bấm nút bên dưới, bạn xác nhận đã khui hộp, kiểm tra đúng sản phẩm & size giày và nhận hàng từ Shipper.</p>
+            <form th:action="@{'/order/scan/' + ${order.id} + '/confirm'}" method="post">
+                <button type="submit" class="btn btn-primary w-100 fw-bold py-3 rounded-4 shadow">
+                    <i class="bi bi-shield-check"></i> XÁC NHẬN ĐÃ NHẬN HÀNG THÀNH CÔNG
+                </button>
+            </form>
+        </div>
+
+        <div th:if="${order != null and order.orderStatus == 'DELIVERED'}" class="py-2">
+            <p class="text-success fw-bold"><i class="bi bi-bag-check-fill"></i> ĐƠN HÀNG NÀY ĐÃ HOÀN THÀNH!</p>
+            <a href="/" class="btn btn-outline-secondary btn-sm w-100 rounded-3">Quay về trang chủ mua sắm</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

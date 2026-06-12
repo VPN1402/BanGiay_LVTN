@@ -27,7 +27,7 @@
                     <thead class="table-light">
                     <tr>
                         <th>Mã đơn</th>
-                        <th>Khách hàng</th>
+                        <th>Độ ưu tiên</th> <th>Khách hàng</th>
                         <th>Tổng tiền</th>
                         <th>Trạng thái</th>
                         <th>Thanh toán</th>
@@ -38,6 +38,12 @@
                     <tr th:each="order : ${orders}">
                         <td class="fw-semibold text-muted" th:text="'#' + ${order.id}"></td>
 
+                        <td>
+            <span class="badge text-uppercase font-monospace"
+                  th:classappend="${order.priority == 1 ? 'bg-danger text-white animate-pulse' : 'bg-light text-dark border'}"
+                  th:text="${order.priority == 1 ? ' Ưu tiên 1 (Chuyển khoản)' : 'Ưu tiên 2 (COD)'}"></span>
+                        </td>
+
                         <td th:text="${order.receiverName}"></td>
 
                         <td class="fw-bold text-danger">
@@ -45,15 +51,15 @@
                         </td>
 
                         <td>
-        <span class="badge"
-              th:classappend="${order.orderStatus == 'PENDING' ? 'bg-warning text-dark' : (order.orderStatus == 'SHIPPING' ? 'bg-info' : (order.orderStatus == 'CANCELLED' ? 'bg-danger' : 'bg-success'))}"
-              th:text="${order.orderStatus == 'PENDING' ? 'Chờ duyệt' : (order.orderStatus == 'SHIPPING' ? 'Đang giao' : (order.orderStatus == 'CANCELLED' ? 'Đã hủy' : 'Hoàn thành'))}"></span>
+            <span class="badge"
+                  th:classappend="${order.orderStatus == 'PENDING' ? 'bg-warning text-dark' : (order.orderStatus == 'SHIPPING' ? 'bg-info' : (order.orderStatus == 'OUT_OF_STOCK' ? 'bg-danger fw-bold' : (order.orderStatus == 'CANCELLED' ? 'bg-secondary' : 'bg-success')))}"
+                  th:text="${order.orderStatus == 'PENDING' ? 'Chờ duyệt' : (order.orderStatus == 'SHIPPING' ? 'Đang giao' : (order.orderStatus == 'OUT_OF_STOCK' ? 'Hết hàng kho ⚠️' : (order.orderStatus == 'CANCELLED' ? 'Đã hủy' : 'Hoàn thành')))}"></span>
                         </td>
 
                         <td>
-        <span class="badge"
-              th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success' : (order.paymentStatus == 'REFUND_PENDING' ? 'bg-warning text-dark' : (order.paymentStatus == 'REFUNDED' ? 'bg-secondary' : 'bg-dark'))}"
-              th:text="${order.paymentStatus == 'PAID' ? 'Đã thanh toán' : (order.paymentStatus == 'REFUND_PENDING' ? 'Chờ hoàn tiền' : (order.paymentStatus == 'REFUNDED' ? 'Đã hoàn tiền' : 'Chưa thanh toán'))}"></span>
+            <span class="badge"
+                  th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success' : (order.paymentStatus == 'REFUND_PENDING' ? 'bg-warning text-dark' : (order.paymentStatus == 'REFUNDED' ? 'bg-secondary' : 'bg-dark'))}"
+                  th:text="${order.paymentStatus == 'PAID' ? 'Đã thanh toán' : (order.paymentStatus == 'REFUND_PENDING' ? 'Chờ hoàn tiền' : (order.paymentStatus == 'REFUNDED' ? 'Đã hoàn tiền' : 'Chưa thanh toán'))}"></span>
                         </td>
 
                         <td class="text-center">
@@ -76,8 +82,7 @@
                     </tr>
 
                     <tr th:if="${#lists.isEmpty(orders)}">
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <i class="bi bi-box-seam fs-1 d-block mb-3"></i>
+                        <td colspan="7" class="text-center py-5 text-muted"> <i class="bi bi-box-seam fs-1 d-block mb-3"></i>
                             Chưa có đơn hàng nào
                         </td>
                     </tr>

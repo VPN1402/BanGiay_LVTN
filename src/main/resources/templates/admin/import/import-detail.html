@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layouts/main-layout}">
+<head>
+  <title>Xử Lý Phiếu Nhập Kho</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    /* CSS custom giúp thu gọn các ô nhập liệu trong bảng không bị tràn khung */
+    .table-input-qty {
+      max-width: 100px;
+      margin: 0 auto;
+      font-weight: bold;
+    }
+    .border-bottom-dashed {
+      border-bottom: 1px dashed #dee2e6;
+    }
+  </style>
+</head>
+<body>
+
+<div layout:fragment="content" class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Chi Tiết Phiếu Nhập Kho #<span th:text="${receipt.id}"></span></h2>
+      <p class="text-muted mb-0">Ngày tạo: <span th:text="${#temporals.format(receipt.importDate, 'dd/MM/yyyy HH:mm')}"></span></p>
+    </div>
+    <a href="/admin/import/list" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Quay lại danh sách
+    </a>
+  </div>
+
+  <div class="card p-4 mb-4 shadow-sm border-0 bg-light">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <span class="text-muted d-block">Nhà cung cấp:</span>
+        <strong class="fs-5 text-dark" th:text="${receipt.supplier != null ? receipt.supplier.name : 'N/A'}"></strong>
+      </div>
+      <div class="col-md-4">
+        <span class="text-muted d-block">Người phụ trách phiếu:</span>
+        <strong class="fs-5 text-dark" th:text="${receipt.user != null ? receipt.user.fullName : 'Hệ thống'}"></strong>
+      </div>
+      <div class="col-md-4">
+        <span class="text-muted d-block">Trạng thái hiện tại:</span>
+        <span th:if="${receipt.status == 'PENDING_APPROVAL'}" class="badge bg-warning text-dark fs-6 px-3 py-2 mt-1">
+                    <i class="bi bi-clock-history"></i> BƯỚC 2: Chờ Admin Duyệt Số Lượng
+                </span>
+        <span th:if="${receipt.status == 'APPROVED'}" class="badge bg-info text-dark fs-6 px-3 py-2 mt-1">
+                    <i class="bi bi-box-seam"></i> BƯỚC 3: Chờ Thủ Kho Kiểm Nhập
+                </span>
+        <span th:if="${receipt.status == 'COMPLETED'}" class="badge bg-success fs-6 px-3 py-2 mt-1">
+                    <i class="bi bi-check-circle"></i> QUY TRÌNH HOÀN TẤT
+                </span>
+      </div>
+      <div class="col-md-12 border-top pt-2 mt-3">
+        <span class="text-muted">Ghi chú phiếu nhập:</span>
+        <span class="text-dark ms-1" th:text="${receipt.note != null && !#strings.isEmpty(receipt.note) ? receipt.note : 'Không có ghi chú'}"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-4 shadow-sm border-0 mb-4" th:if="${receipt.status == 'PENDING_APPROVAL'}">
+    <div class="border-bottom pb-3 mb-3">
+      <h5 class="fw-bold text-primary mb-1"><i class="bi bi-shield-check"></i> Ban Giám Đốc Phê Duyệt Số Lượng Mua</h5>
+      <p class="text-muted small mb-0">Hệ thống hiển thị đề xuất từ file CSV. Bạn có thể tích chọn mặt hàng và sửa hạ số lượng xuống nếu sợ bán ế.</p>
+    </div>
+
+    <form th:action="@{'/admin/import/approve/' + ${receipt.id}}" method="post">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-light text-center">
+          <tr>
+            <th style="width: 8%;">Chọn Mua</th>
+            <th>Tên Sản Phẩm</th>
+            <th style="width: 10%;">Size</th>
+            <th style="width: 15%;">Số Đề Xuất (CSV)</th>
+            <th style="width: 18%;">Số Lượng Chốt Nhập <span class="text-danger">*</span></th>
+            <th style="width: 15%;">Giá Nhập Dự Kiến</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="d : ${receipt.details}">
+            <td class="text-center">
+              <input type="hidden" name="detailId" th:value="${d.id}">
+              <input type="checkbox" name="isSelected" th:value="${d.id}" class="form-check-input" checked>
+            </td>
+            <td>
+              <strong th:text="${d.productSize != null && d.productSize.product != null ? d.productSize.product.name : 'Sản phẩm không rõ'}"></strong>
+            </td>
+            <td class="text-center">
+              <span class="badge bg-secondary px-2 py-1 fs-6" th:text="${d.productSize != null ? d.productSize.size : 'N/A'}"></span>
+            </td>
+            <td class="text-center fw-bold text-muted fs-6" th:text="${d.requestedQuantity}"></td>
+            <td>
+              <input type="number"
+                     name="approvedQty"
+                     th:value="${d.requestedQuantity}"
+                     th:max="${d.requestedQuantity}"
+                     class="form-control text-center text-primary table-input-qty fs-6"
+                     min="0"
+                     required>
+            </td>
+            <td class="text-end fw-semibold text-danger" th:text="${#numbers.formatDecimal(d.importPrice, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="text-end mt-3">
+        <button type="submit" class="btn btn-primary px-4 py-2" onclick="return confirm('Xác nhận phê duyệt danh sách và số lượng đã chỉnh sửa?')">
+          <i class="bi bi-file-earmark-check"></i> Xác Nhận & Phê Duyệt Đơn Đặt Hàng
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card p-4 shadow-sm border-0 mb-4" th:if="${receipt.status == 'APPROVED'}">
+    <div class="border-bottom pb-3 mb-3">
+      <h5 class="fw-bold text-info mb-1"><i class="bi bi-clipboard2-check"></i> Kiểm Đếm Thực Tế Tại Kho</h5>
+      <p class="text-muted small mb-0">Hàng về tới kho. Thủ kho đếm số lượng thực tế nhận được dựa trên con số Admin đã chốt duyệt.</p>
+    </div>
+
+    <form th:action="@{'/admin/import/confirm-warehouse/' + ${receipt.id}}" method="post">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-light text-center">
+          <tr>
+            <th>Tên Sản Phẩm - Kích Cỡ</th>
+            <th style="width: 15%;">Số Lượng Sếp Duyệt</th>
+            <th style="width: 20%;">Số Lượng Thực Nhận (Hàng Đạt) <span class="text-danger">*</span></th>
+            <th style="width: 20%;">Số Lượng Lỗi/Hỏng/Rách Vỏ</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="d : ${receipt.details}" th:if="${d.isApproved}">
+            <td>
+              <input type="hidden" name="detailId" th:value="${d.id}">
+              <span class="fw-bold" th:text="${d.productSize.product.name}"></span>
+              <span class="badge bg-secondary ms-1" th:text="'Size ' + ${d.productSize.size}"></span>
+            </td>
+            <td class="text-center fw-bold text-primary fs-5" th:text="${d.approvedQuantity}"></td>
+            <td>
+              <input type="number"
+                     name="actualQty"
+                     th:value="${d.approvedQuantity}"
+                     th:max="${d.approvedQuantity}"
+                     class="form-control text-center text-success table-input-qty fs-6"
+                     min="0"
+                     required>
+            </td>
+            <td>
+              <input type="number"
+                     name="damagedQty"
+                     value="0"
+                     class="form-control text-center text-danger table-input-qty fs-6"
+                     min="0"
+                     required>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="text-end mt-3">
+        <button type="submit" class="btn btn-success px-4 py-2"
+                onclick="return confirm('Hệ thống sẽ cộng dồn số lượng thực nhận trực tiếp vào kho dữ liệu. Xác nhận đóng kho?')">
+          <i class="bi bi-box-arrow-in-down"></i> Xác Nhận Nhập Kho & Cộng Tồn
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card p-4 shadow-sm border-0" th:if="${receipt.status == 'COMPLETED'}">
+    <div class="border-bottom pb-3 mb-3">
+      <h5 class="fw-bold text-success mb-1"><i class="bi bi-archive"></i> Nhật Ký Dữ Liệu Lịch Sử Nhập Kho</h5>
+      <p class="text-muted small mb-0">Phiếu nhập kho hoàn tất. Dưới đây là đối chiếu số liệu qua các giai đoạn.</p>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped align-middle">
+        <thead class="table-light text-center fw-bold text-dark">
+        <tr>
+          <th style="color: #333 !important;">Sản Phẩm</th>
+          <th style="width: 10%; color: #333 !important;">Size</th>
+          <th style="width: 12%; color: #333 !important;">Đề Xuất (CSV)</th>
+          <th style="width: 12%; color: #333 !important;">Sếp Duyệt</th>
+          <th style="width: 15%; color: #333 !important;">Thực Nhập Kho</th>
+          <th style="width: 12%; color: #333 !important;">Hàng Lỗi</th>
+          <th style="width: 15%; color: #333 !important;">Giá Nhập</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="d : ${receipt.details}">
+          <td>
+            <strong class="text-dark" th:text="${d.productSize != null && d.productSize.product != null ? d.productSize.product.name : 'Sản phẩm không rõ'}"></strong>
+          </td>
+          <td class="text-center">
+            <span class="badge bg-secondary px-2 py-1 fs-6" th:text="${d.productSize != null ? d.productSize.size : 'N/A'}"></span>
+          </td>
+          <td class="text-center text-muted fw-bold" th:text="${d.requestedQuantity}"></td>
+          <td class="text-center text-primary fw-bold" th:text="${d.isApproved ? d.approvedQuantity : 'Bỏ duyệt'}"></td>
+          <td class="text-center text-success fw-bold fs-5" th:text="${d.actualQuantity}"></td>
+          <td class="text-center text-danger fw-bold" th:text="${d.damagedQuantity}"></td>
+          <td class="text-end fw-semibold text-danger" th:text="${#numbers.formatDecimal(d.importPrice, 0, 'POINT', 0, 'COMMA')} + ' đ'"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="text-end mt-3 bg-light p-3 rounded border">
+      <h4 class="text-danger fw-bold mb-0">
+        Tổng Tiền Thanh Toán Thực Tế:
+        <span th:text="${#numbers.formatDecimal(receipt.totalAmount, 0, 'POINT', 0, 'COMMA')}"></span> đ
+      </h4>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

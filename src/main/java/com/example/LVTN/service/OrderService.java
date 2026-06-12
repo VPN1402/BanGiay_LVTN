@@ -26,4 +26,9 @@ public interface OrderService {
     void cancelOrder(Long orderId, Long userId);
 
     List<Order> findByUser(User user);
+
+
+    String submitXuatKho(Long orderId, String usernameNhanVien);
+    List<Order> getOrdersSortedByPriority();
+    void confirmReceivedByQR(Long orderId);
 }

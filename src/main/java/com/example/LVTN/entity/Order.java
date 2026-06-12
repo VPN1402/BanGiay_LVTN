@@ -30,6 +30,9 @@ public class Order {
     private String receiverPhone;
     private String shippingAddress;
 
+    private Integer priority;      // 1: VNPAY (Ưu tiên xử lý trước), 2: COD (Xử lý sau)
+    private String processedBy;    // Lưu tên tài khoản nhân viên kho bấm xác nhận đi đơn
+    private LocalDateTime processedAt; // Lưu ngày giờ thực hiện xuất kho
     @Column(columnDefinition = "TEXT")
     private String note;
 

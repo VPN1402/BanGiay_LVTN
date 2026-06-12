@@ -20,37 +20,58 @@
                 <p><strong>Họ tên:</strong> [[${order.receiverName}]]</p>
                 <p><strong>SĐT:</strong> [[${order.receiverPhone}]]</p>
                 <p><strong>Địa chỉ:</strong> [[${order.shippingAddress}]]</p>
+                <p class="mb-0"><strong>Độ ưu tiên xử lý:</strong>
+                    <span class="badge" th:classappend="${order.priority == 1 ? 'bg-danger' : 'bg-secondary'}"
+                          th:text="${order.priority == 1 ? ' ƯU TIÊN CAO (ĐÃ CK)' : 'COD THƯỜNG'}"></span>
+                </p>
             </div>
 
-            <div class="card p-4 shadow-sm rounded-4 border-0">
-                <h5 class="fw-bold mb-3"><i class="bi bi-pencil-square"></i> Cập nhật đơn hàng</h5>
-                <form th:action="@{/admin/orders/update}" method="post">
-                    <input type="hidden" name="orderId" th:value="${order.id}">
+            <div th:if="${order.processedBy != null}" class="card p-4 mb-4 shadow-sm rounded-4 border-0 bg-light border-start border-success border-3">
+                <h5 class="fw-bold mb-3 text-success"><i class="bi bi-shield-check"></i> Nhật ký xuất kho</h5>
+                <p class="mb-1"><strong>Nhân viên xác nhận:</strong> <span class="text-danger fw-bold" th:text="${order.processedBy}"></span></p>
+                <p class="mb-0"><strong>Thời gian xuất:</strong> <span class="text-muted small" th:text="${#temporals.format(order.processedAt, 'dd/MM/yyyy HH:mm:ss')}"></span></p>
+            </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-muted small">Trạng thái đơn</label>
-                        <select name="orderStatus" class="form-select">
-                            <option value="PENDING" th:selected="${order.orderStatus == 'PENDING'}">Chờ xác nhận</option>
-                            <option value="SHIPPING" th:selected="${order.orderStatus == 'SHIPPING'}">Đang giao</option>
-                            <option value="DELIVERED" th:selected="${order.orderStatus == 'DELIVERED'}">Đã giao</option>
-                            <option value="CANCELLED" th:selected="${order.orderStatus == 'CANCELLED'}">Đã hủy</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-muted small">Thanh toán</label>
-                        <select name="paymentStatus" class="form-select">
-                            <option value="UNPAID" th:selected="${order.paymentStatus == 'UNPAID'}">Chưa thanh toán</option>
-                            <option value="PAID" th:selected="${order.paymentStatus == 'PAID'}">Đã thanh toán</option>
-                            <option value="REFUND_PENDING" th:selected="${order.paymentStatus == 'REFUND_PENDING'}">Chờ Hoàn Tiền</option>
-                            <option value="REFUNDED" th:selected="${order.paymentStatus == 'REFUNDED'}">Đã Hoàn Tiền</option>
-
-                        </select>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100">Cập nhật đơn hàng</button>
+            <div th:if="${order.orderStatus == 'PENDING'}" class="card p-4 mb-4 shadow-sm rounded-4 border-0 bg-warning bg-opacity-10">
+                <h5 class="fw-bold mb-3 text-warning-dominant"><i class="bi bi-box-seam"></i> Xử lý đi đơn</h5>
+                <form th:action="@{'/admin/warehouse/submit-export/' + ${order.id}}" method="post">
+                    <button type="submit" class="btn btn-danger w-100 fw-bold py-2 shadow-sm"
+                            onclick="return confirm('Xác nhận sản phẩm thực tế đã đủ, hệ thống sẽ tự động trừ kho và lưu vết tài khoản của bạn để chống gian lận?')">
+                         BẤM XÁC NHẬN XUẤT KHO
+                    </button>
                 </form>
+                <small class="text-muted d-block mt-2 text-center">Lưu ý: Bấm nút này hệ thống mới thực hiện trừ số lượng trong kho giày.</small>
             </div>
+
+<!--            <div class="card p-4 shadow-sm rounded-4 border-0">-->
+<!--                <h5 class="fw-bold mb-3"><i class="bi bi-pencil-square"></i> Cập nhật nâng cao</h5>-->
+<!--                <form th:action="@{/admin/orders/update}" method="post">-->
+<!--                    <input type="hidden" name="orderId" th:value="${order.id}">-->
+
+<!--                    <div class="mb-3">-->
+<!--                        <label class="form-label text-muted small">Trạng thái đơn</label>-->
+<!--                        <select name="orderStatus" class="form-select">-->
+<!--                            <option value="PENDING" th:selected="${order.orderStatus == 'PENDING'}">Chờ xác nhận</option>-->
+<!--                            <option value="SHIPPING" th:selected="${order.orderStatus == 'SHIPPING'}">Đang giao</option>-->
+<!--                            <option value="DELIVERED" th:selected="${order.orderStatus == 'DELIVERED'}">Đã giao</option>-->
+<!--                            <option value="OUT_OF_STOCK" th:selected="${order.orderStatus == 'OUT_OF_STOCK'}">⚠️ Hết hàng kho (Chờ NCC)</option>-->
+<!--                            <option value="CANCELLED" th:selected="${order.orderStatus == 'CANCELLED'}">Đã hủy</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+
+<!--                    <div class="mb-3">-->
+<!--                        <label class="form-label text-muted small">Thanh toán</label>-->
+<!--                        <select name="paymentStatus" class="form-select">-->
+<!--                            <option value="UNPAID" th:selected="${order.paymentStatus == 'UNPAID'}">Chưa thanh toán</option>-->
+<!--                            <option value="PAID" th:selected="${order.paymentStatus == 'PAID'}">Đã thanh toán</option>-->
+<!--                            <option value="REFUND_PENDING" th:selected="${order.paymentStatus == 'REFUND_PENDING'}">Chờ Hoàn Tiền</option>-->
+<!--                            <option value="REFUNDED" th:selected="${order.paymentStatus == 'REFUNDED'}">Đã Hoàn Tiền</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+
+<!--                    <button type="submit" class="btn btn-primary w-100">Cập nhật đơn hàng</button>-->
+<!--                </form>-->
+<!--            </div>-->
         </div>
 
         <div class="col-md-8">
@@ -82,6 +103,34 @@
                 <hr>
                 <h4 class="text-end text-danger fw-bold">Tổng tiền: [[${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}]]đ</h4>
             </div>
+            <div class="card p-4 mb-4 shadow-sm rounded-4 border-0 text-center bg-white">
+                <h5 class="fw-bold mb-3 text-start"><i class="bi bi-qr-code-scan"></i> Nhãn QR Hộp Giày</h5>
+
+                <div class="p-3 bg-light d-inline-block rounded-3 mb-2">
+                    <img th:src="'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=http://10.188.62.5:8080/order/scan/' + ${order.id}"
+                         alt="Mã QR Đơn Hàng" class="img-fluid shadow-sm" id="qrCodeImage">
+                </div>
+
+                <p class="small text-muted mb-3">Mã QR chứa link xác nhận nhận hàng dành riêng cho Đơn hàng này.</p>
+
+                <button class="btn btn-outline-dark btn-sm w-100" onclick="printQR()">
+                    <i class="bi bi-printer"></i> In nhãn QR hộp giày
+                </button>
+            </div>
+
+<!--            <script>-->
+<!--                function printQR() {-->
+<!--                    var qrUrl = document.getElementById('qrCodeImage').src;-->
+<!--                    var printWindow = window.open('', '_blank', 'width=300,height=300');-->
+<!--                    printWindow.document.write('<html><body style="text-align:center;margin-top:40px;">');-->
+<!--                    printWindow.document.write('<h3>KICKS STORE - ĐƠN #' + '[[${order.id}]]' + '</h3>');-->
+<!--                    printWindow.document.write('<img src="' + qrUrl + '" style="width:180px;height:180px;"/>');-->
+<!--                    printWindow.document.write('<p style="font-size:12px;font-family:sans-serif;">Quét mã này để xác nhận đã nhận giày</p>');-->
+<!--                    printWindow.document.write('</body></html>');-->
+<!--                    printWindow.document.close();-->
+<!--                    printWindow.print();-->
+<!--                }-->
+<!--            </script>-->
         </div>
     </div>
 </div>
