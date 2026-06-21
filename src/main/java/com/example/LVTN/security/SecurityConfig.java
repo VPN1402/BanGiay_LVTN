@@ -24,9 +24,19 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/css/**", "/js/**", "/register").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        // Cho phép mọi tài khoản (kể cả Supplier) tải các file CSS/JS nằm trong thư mục admin này
+                        .requestMatchers(
+                                "/auth/**",
+                                "/css/**",
+                                "/js/**",
+                                "/admin/css/**",
+                                "/admin/js/**",
+                                "/register"
+                        ).permitAll()
+
                         .requestMatchers("/cart/**").permitAll()
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/supplier/**").hasAuthority("ROLE_SUPPLIER")
                         .anyRequest().permitAll()
                 )
 
@@ -42,8 +52,14 @@ public class SecurityConfig {
                                     .stream()
                                     .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
+                            boolean isSupplier = authentication.getAuthorities()
+                                    .stream()
+                                    .anyMatch(a -> a.getAuthority().equals("ROLE_SUPPLIER"));
+
                             if (isAdmin) {
                                 response.sendRedirect("/admin");
+                            } else if (isSupplier) {
+                                response.sendRedirect("/supplier/bid/create");
                             } else {
                                 response.sendRedirect("/");
                             }

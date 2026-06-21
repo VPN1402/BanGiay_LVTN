@@ -37,4 +37,19 @@ public class ImportReceipt {
 
     @OneToMany(mappedBy = "importReceipt", cascade = CascadeType.ALL)
     private List<ImportReceiptDetail> details = new ArrayList<>();
+
+
+    @ManyToOne
+    @JoinColumn(name = "procurement_request_id")
+    private ProcurementRequest procurementRequest;
+
+
+
+    @ManyToOne
+    @JoinColumn(name = "approved_by")
+    private User approvedBy; // Lưu người (Admin) phê duyệt chốt số lượng mua
+
+    @ManyToOne
+    @JoinColumn(name = "completed_by")
+    private User completedBy; // Lưu người (Thủ kho) kiểm nhận hoàn tất kho
 }

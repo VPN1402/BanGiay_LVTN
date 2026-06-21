@@ -21,4 +21,8 @@ public interface ImportReceiptService {
 
     // Lấy chi tiết một phiếu nhập
     ImportReceipt findById(Long id);
+
+    public void selectWinningBid(Long procurementRequestId, Long winningReceiptId);
+
+    ImportReceipt save(ImportReceipt receipt);
 }
