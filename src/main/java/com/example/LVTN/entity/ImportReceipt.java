@@ -47,9 +47,11 @@ public class ImportReceipt {
 
     @ManyToOne
     @JoinColumn(name = "approved_by")
-    private User approvedBy; // Lưu người (Admin) phê duyệt chốt số lượng mua
+    private User approvedBy; // Lưu Admin phê duyệt chốt số lượng mua
 
     @ManyToOne
     @JoinColumn(name = "completed_by")
-    private User completedBy; // Lưu người (Thủ kho) kiểm nhận hoàn tất kho
+    private User completedBy; // Lưu Thủ kho kiểm nhận hoàn tất kho
+
+
 }

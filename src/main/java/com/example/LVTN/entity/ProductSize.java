@@ -19,6 +19,9 @@ public class ProductSize {
 
     private Integer quantity;
 
+    @Column(name = "min_quantity")
+    private Integer minQuantity;
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;

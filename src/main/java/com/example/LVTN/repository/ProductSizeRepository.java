@@ -2,6 +2,7 @@ package com.example.LVTN.repository;
 
 import com.example.LVTN.entity.ProductSize;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,4 +14,8 @@ public interface ProductSizeRepository extends JpaRepository<ProductSize, Long> 
     List<ProductSize> findByProductId(Long productId);
     // Thêm hàm này để chốt tồn kho theo product_id và size
     Optional<ProductSize> findByProductIdAndSize(Long productId, String size);
+
+    // Câu truy vấn JPQL tìm sản phẩm có số lượng nhỏ hơn ngưỡng tối thiểu
+    @Query("SELECT ps FROM ProductSize ps WHERE ps.quantity < ps.minQuantity")
+    List<ProductSize> findAllLowStock();
 }

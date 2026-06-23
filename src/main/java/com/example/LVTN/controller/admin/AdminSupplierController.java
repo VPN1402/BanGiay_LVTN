@@ -1,4 +1,5 @@
 package com.example.LVTN.controller.admin;
+
 import com.example.LVTN.entity.Role;
 import com.example.LVTN.entity.Supplier;
 import com.example.LVTN.entity.User;
@@ -6,12 +7,10 @@ import com.example.LVTN.repository.RoleRepository;
 import com.example.LVTN.repository.SupplierRepository;
 import com.example.LVTN.repository.UserRepository;
 import com.example.LVTN.service.SupplierService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -34,61 +33,64 @@ public class AdminSupplierController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // --- SUPPLIERS ---
+    // Hiển thị danh sách
     @GetMapping("/suppliers")
     public String listSuppliers(Model model) {
         model.addAttribute("suppliers", supplierService.findAll());
         return "admin/supplier/list";
     }
 
+    // Hiển thị Form thêm mới
     @GetMapping("/suppliers/add")
     public String showAddSupplierForm() {
-        return "admin/supplier/add"; // Trỏ đúng đến file HTML vừa tạo ở Bước 1
+        return "admin/supplier/add";
     }
 
-    // 2. Xử lý đồng thời: Lưu Nhà cung cấp + Tạo & liên kết luôn Tài khoản
-    @PostMapping("/supplier/save") // Đảm bảo có dấu gạch chéo / ở đầu
+    // Xử lý lưu form
+    @PostMapping("/supplier/save")
     public String saveSupplier(
             @RequestParam("name") String name,
             @RequestParam(value = "supplierPhone", required = false) String supplierPhone,
             @RequestParam(value = "address", required = false) String address,
             @RequestParam("fullName") String fullName,
-            @RequestParam("email") String email,
+            @RequestParam("supplierEmail") String supplierEmail, // Khớp 100% với HTML
+            @RequestParam("userEmail") String userEmail,         // ĐÃ SỬA: Đổi từ "email" thành "userEmail" để khớp với HTML
             @RequestParam(value = "userPhone", required = false) String userPhone,
             @RequestParam("password") String password,
             RedirectAttributes redirectAttributes) {
 
-        // Làm sạch dữ liệu email đầu vào để tránh khoảng trắng vô tình
-        String cleanEmail = (email != null) ? email.trim() : "";
+        // Làm sạch dữ liệu email tài khoản đăng nhập
+        String cleanUserEmail = (userEmail != null) ? userEmail.trim() : "";
 
         try {
-            // 1. Kiểm tra chính xác email sạch
-            if (!cleanEmail.isEmpty()) {
-                User existingUser = userRepository.findByEmail(cleanEmail).orElse(null);
+            // 1. Kiểm tra xem Email đăng nhập này đã có ai dùng chưa
+            if (!cleanUserEmail.isEmpty()) {
+                User existingUser = userRepository.findByEmail(cleanUserEmail).orElse(null);
                 if (existingUser != null) {
-                    redirectAttributes.addFlashAttribute("errorMessage", "Thất bại: Email [" + cleanEmail + "] đã được cấp cho tài khoản khác!");
-                    return "redirect:/admin/suppliers/add"; // Đồng bộ chuẩn đường dẫn GET hiển thị form
+                    redirectAttributes.addFlashAttribute("errorMessage", "Thất bại: Email đăng nhập [" + cleanUserEmail + "] đã được cấp cho tài khoản khác!");
+                    return "redirect:/admin/suppliers/add";
                 }
             }
 
             // BƯỚC A: Khởi tạo và lưu thông tin Nhà Cung Cấp mới
             Supplier supplier = new Supplier();
             supplier.setName(name);
+            supplier.setEmail(supplierEmail.trim()); // Lưu Email của doanh nghiệp
             supplier.setPhone(supplierPhone);
             supplier.setAddress(address);
             supplier = supplierRepository.save(supplier);
 
-            // BƯỚC B: Khởi tạo Tài khoản đăng nhập gán trực tiếp cho Nhà Cung Cấp này
+            // BƯỚC B: Khởi tạo Tài khoản đăng nhập cho Nhà Cung Cấp này
             User user = new User();
             user.setFullName(fullName);
-            user.setEmail(cleanEmail);
+            user.setEmail(cleanUserEmail); // Lưu Email đăng nhập của người đại diện
             user.setPhone(userPhone);
             user.setStatus(1);
 
-            // Mã hóa mật khẩu bảo mật theo cơ chế Spring Security
+            // Mã hóa mật khẩu bảo mật
             user.setPassword(passwordEncoder.encode(password));
 
-            // Tìm và gán quyền nhà cung cấp ROLE_SUPPLIER
+            // Tìm và gán quyền ROLE_SUPPLIER
             Role supplierRole = roleRepository.findByRoleName("ROLE_SUPPLIER");
             if (supplierRole == null) {
                 supplierRole = new Role();
@@ -97,21 +99,19 @@ public class AdminSupplierController {
             }
             user.setRole(supplierRole);
 
-            // LIÊN KẾT: Đưa thực thể Supplier vừa lưu vào tài khoản
+            // LIÊN KẾT: Gán nhà cung cấp vừa tạo vào tài khoản user này (Khóa ngoại)
             user.setSupplier(supplier);
 
-            // Lưu tài khoản đăng nhập xuống database
+            // Lưu tài khoản xuống DB
             userRepository.save(user);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Đã thêm nhà cung cấp thành công và cấp tài khoản: " + cleanEmail);
-            return "redirect:/admin/suppliers/add"; // Đồng bộ chuẩn 100%
+            redirectAttributes.addFlashAttribute("successMessage", "Đã thêm nhà cung cấp thành công và cấp tài khoản: " + cleanUserEmail);
+            return "redirect:/admin/suppliers/add";
 
         } catch (Exception e) {
-            // In chi tiết lỗi thực sự ra console (màn hình đen) để bạn nhìn thấy lỗi thật là gì
-            e.printStackTrace();
-
+            e.printStackTrace(); // In lỗi thật ra console để kiểm tra nếu có biến cố khác
             redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi hệ thống xảy ra: " + e.getMessage());
-            return "redirect:/admin/suppliers/add"; // 🛠️ ĐÃ SỬA: Không bao giờ sợ nhảy nhầm đường dẫn lạ gây lỗi ảo nữa
+            return "redirect:/admin/suppliers/add";
         }
     }
 
@@ -123,16 +123,13 @@ public class AdminSupplierController {
     }
 
     @GetMapping("/supplier/delete/{id}")
-    public String deleteSupplier(@PathVariable("id") Long id,
-                                 org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+    public String deleteSupplier(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         if (supplierService.hasReceipts(id)) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa đối tác này vì hệ thống đang lưu lịch sử các lô hàng giày thể thao do họ cung cấp!");
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa đối tác này vì hệ thống đang lưu lịch sử lô hàng!");
         } else {
             supplierService.delete(id);
             redirectAttributes.addFlashAttribute("successMessage", "Đã xóa thông tin nhà cung cấp khỏi danh sách!");
         }
         return "redirect:/admin/suppliers";
     }
-
-
 }

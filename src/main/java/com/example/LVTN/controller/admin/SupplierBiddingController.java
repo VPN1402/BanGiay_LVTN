@@ -1,11 +1,14 @@
 package com.example.LVTN.controller.admin;
 
 import com.example.LVTN.entity.*;
+import com.example.LVTN.repository.ProcurementRequestDetailRepository;
+import com.example.LVTN.repository.ProcurementRequestRepository;
 import com.example.LVTN.repository.ProductSizeRepository;
 import com.example.LVTN.repository.SupplierRepository;
 import com.example.LVTN.service.ImportReceiptService;
 import com.example.LVTN.service.SupplierService;
 import com.example.LVTN.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,7 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -36,6 +41,8 @@ public class SupplierBiddingController {
     @Autowired
     private SupplierRepository supplierRepository;
 
+    @Autowired
+    private ProcurementRequestRepository procRequestRepo;
 
 
     @GetMapping("/bid/create") // Hoặc đường dẫn GET hiển thị form này của bạn
@@ -66,74 +73,68 @@ public class SupplierBiddingController {
     // 2. Xử lý đọc file CSV báo giá từ Nhà Cung Cấp
     @PostMapping("/bid/save")
     public String saveSupplierBid(@RequestParam("file") MultipartFile file,
-                                  @RequestParam(value = "note", required = false) String note, // Thêm required = false để tránh lỗi nếu note trống
+                                  @RequestParam("requestId") Long requestId, // ID của đợt thu mua từ form
+                                  @RequestParam(value = "note", required = false) String note,
                                   Principal principal,
                                   RedirectAttributes redirectAttributes) {
         try {
             if (file.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn một file CSV hợp lệ!");
-                return "redirect:/supplier/bid/create";
+                return "redirect:/supplier/bid/create/" + requestId;
             }
 
-            // BẢO MẬT: Lấy tự động thông tin nhà cung cấp đang đăng nhập thông qua phiên (Principal)
+            // 1. Kiểm tra nhà cung cấp đăng nhập
             User loggedInUser = userService.findByEmail(principal.getName());
             if (loggedInUser == null || loggedInUser.getSupplier() == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Tài khoản của bạn chưa được liên kết với Nhà Cung Cấp nào!");
-                return "redirect:/supplier/bid/create";
+                redirectAttributes.addFlashAttribute("errorMessage", "Tài khoản chưa được liên kết với Nhà Cung Cấp!");
+                return "redirect:/supplier/bid/list";
             }
             Supplier currentSupplier = loggedInUser.getSupplier();
 
-            // Khởi tạo Phiếu báo giá dạng PENDING
+            // 2. Lấy đợt thu mua từ database
+            ProcurementRequest request = procRequestRepo.findById(requestId).orElse(null);
+            if (request == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Đợt thu mua không tồn tại!");
+                return "redirect:/supplier/bid/list";
+            }
+
+            // 3. Khởi tạo Phiếu báo giá (ImportReceipt)
             ImportReceipt receipt = new ImportReceipt();
             receipt.setSupplier(currentSupplier);
             receipt.setUser(loggedInUser);
             receipt.setNote(note);
             receipt.setStatus("PENDING");
 
+            // QUAN TRỌNG: Gán đợt thu mua vào phiếu báo giá
+            receipt.setProcurementRequest(request);
+
             List<ImportReceiptDetail> detailsList = new ArrayList<>();
 
-            // Đọc file CSV dữ liệu báo giá
+            // 4. Đọc file CSV
             try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"))) {
                 String line;
                 boolean isHeader = true;
 
                 while ((line = br.readLine()) != null) {
-                    if (isHeader) {
-                        isHeader = false; // Bỏ qua dòng tiêu đề đầu tiên của file CSV
-                        continue;
-                    }
-
-                    // Bỏ qua nếu gặp dòng trống trong file
+                    if (isHeader) { isHeader = false; continue; }
                     if (line.trim().isEmpty()) continue;
 
-                    // Tách chuỗi hỗ trợ cả dấu phẩy (,) và dấu chấm phẩy (;) đề phòng định dạng Excel thay đổi
                     String[] data = line.split(",|;");
-                    if (data.length < 5) continue; // File của bạn bắt buộc phải có từ 5 cột trở lên
+                    if (data.length < 5) continue;
 
                     try {
-                        // ĐỌC ĐÚNG CHỈ SỐ INDEX THEO FILE CSV CỦA BẠN:
-                        // data[0] = product_id (Bỏ qua, không cần parse nếu không dùng đến)
-                        // data[1] = product_name (Đây là chuỗi "Giay Nike Air Force 1", không được parse sang số)
-
-                        Long sizeId = Long.parseLong(data[2].trim());          // Cột số 3 (Index 2): size_id
-                        Integer reqQty = Integer.parseInt(data[3].trim());       // Cột số 4 (Index 3): requested_quantity
-                        BigDecimal price = new BigDecimal(data[4].trim());     // Cột số 5 (Index 4): bid_price
+                        Long sizeId = Long.parseLong(data[2].trim());
+                        Integer reqQty = Integer.parseInt(data[3].trim());
+                        BigDecimal price = new BigDecimal(data[4].trim());
 
                         ProductSize ps = productSizeRepository.findById(sizeId).orElse(null);
                         if (ps != null) {
                             ImportReceiptDetail detail = new ImportReceiptDetail();
                             detail.setImportReceipt(receipt);
                             detail.setProductSize(ps);
-
-                            // GÁN CẢ 2 ĐỂ TRÁNH LỖI (Tùy thuộc vào Entity của bạn đang dùng trường nào làm số lượng gốc)
+                            detail.setQuantity(reqQty); // Dùng cho số lượng thực tế
                             detail.setRequestedQuantity(reqQty);
-
-                            // BỔ SUNG DÒNG NÀY: Giúp hàm getQuantity() không bao giờ bị null nữa
-                            detail.setQuantity(reqQty);
-
                             detail.setImportPrice(price);
-
-                            // Mặc định thiết lập ban đầu bằng 0
                             detail.setApprovedQuantity(0);
                             detail.setActualQuantity(0);
                             detail.setDamagedQuantity(0);
@@ -142,30 +143,93 @@ public class SupplierBiddingController {
                             detailsList.add(detail);
                         }
                     } catch (NumberFormatException e) {
-                        // Nếu có dòng nào bị lỗi định dạng số, bỏ qua dòng đó và tiếp tục đọc, tránh sập toàn hệ thống
-                        System.err.println("Bỏ qua dòng lỗi định dạng dữ liệu số: " + line);
+                        System.err.println("Dòng lỗi định dạng: " + line);
                         continue;
                     }
                 }
             }
 
             if (detailsList.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy dữ liệu báo giá hợp lệ nào trong file CSV!");
-                return "redirect:/supplier/bid/create";
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy dữ liệu hợp lệ trong file!");
+                return "redirect:/supplier/bid/create/" + requestId;
             }
 
             receipt.setDetails(detailsList);
 
-            // Gọi dịch vụ lưu nháp phiếu đấu thầu ẩn
+            // 5. Lưu vào Database
             importReceiptService.saveDraftReceipt(receipt);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Nộp hồ sơ báo giá thành công! Vui lòng chờ kết quả đấu thầu.");
-            return "redirect:/supplier/bid/create";
+            redirectAttributes.addFlashAttribute("successMessage", "Nộp báo giá cho đợt #" + requestId + " thành công!");
+            return "redirect:/supplier/bid/list";
 
         } catch (Exception e) {
-            e.printStackTrace(); // In chi tiết log lỗi ra console phục vụ debug
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi xử lý file CSV: " + e.getMessage());
-            return "redirect:/supplier/bid/create";
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            return "redirect:/supplier/bid/create/" + requestId;
         }
+    }
+    @GetMapping("/bid/list")
+    public String listBiddableRequests(Model model) {
+        // Giả sử bạn có repository để lọc theo trạng thái
+        model.addAttribute("requests", procRequestRepo.findByStatus("SENT"));
+        return "admin/supplier/bid-list";
+    }
+
+    // Khi nhấn "Nộp báo giá" từ trang danh sách, truyền ID qua
+    @GetMapping("/bid/create/{requestId}")
+    public String showImportStockForm(@PathVariable("requestId") Long requestId, Model model) {
+        // Tìm đợt thu mua để đẩy sang HTML
+        ProcurementRequest request = procRequestRepo.findById(requestId).orElse(null);
+        model.addAttribute("request", request);
+        model.addAttribute("requestId", requestId);
+
+        // Đẩy danh sách nhà cung cấp (nếu cần)
+        model.addAttribute("allSuppliers", supplierRepository.findAll());
+
+        return "admin/supplier/import-stock";
+    }
+    // 1. Hàm hiển thị trang CHI TIẾT đợt thu mua
+    @GetMapping("/bid/detail/{id}")
+    public String viewBidDetail(@PathVariable("id") Long id, Model model) {
+        ProcurementRequest request = procRequestRepo.findById(id).orElse(null);
+        if (request == null) {
+            return "redirect:/supplier/bid/list";
+        }
+        model.addAttribute("request", request);
+        return "admin/supplier/bid-detail"; // Tạo file HTML mới ở Bước 3
+    }
+
+    // 2. Hàm TỰ ĐỘNG TẠO VÀ CHO TẢI FILE CSV MẪU (Chuẩn doanh nghiệp)
+    @GetMapping("/bid/export-csv/{id}")
+    public void exportCsvTemplate(@PathVariable("id") Long id, HttpServletResponse response) throws IOException {
+        ProcurementRequest request = procRequestRepo.findById(id).orElse(null);
+        if (request == null) return;
+
+        // Thiết lập Header để trình duyệt tự hiểu đây là file tải về
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=YeuCauBaoGia_Dot_" + id + ".csv");
+
+        PrintWriter writer = response.getWriter();
+
+        // Ghi mã BOM để Excel không bị lỗi font tiếng Việt khi mở
+        writer.write('\uFEFF');
+
+        // Ghi dòng tiêu đề cột (Đúng chuẩn index mà hàm đọc file CSV của bạn đang yêu cầu)
+        writer.println("Mã sản phẩm,Tên sản phẩm,Mã kích thước,Số lượng yêu cầu,Giá nhập thầu");
+
+        // Duyệt qua danh sách Admin yêu cầu để ghi vào file CSV
+        for (ProcurementRequestDetail detail : request.getDetails()) {
+            Long productId = detail.getProductSize().getProduct().getId();
+            String productName = detail.getProductSize().getProduct().getName().replace(",", " "); // Tránh lỗi dấu phẩy trong CSV
+            Long sizeId = detail.getProductSize().getId();
+            Integer quantity = detail.getQuantityNeeded(); // Lấy từ trường quantityNeeded trong Entity của bạn
+
+            // Dòng dữ liệu mẫu (để trống cột cuối cùng "Giá nhập thầu" hoặc để là 0 để NCC tự điền)
+            writer.println(productId + "," + productName + "," + sizeId + "," + quantity + ",0");
+        }
+
+        writer.flush();
+        writer.close();
     }
 }

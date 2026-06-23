@@ -14,7 +14,7 @@ public class ProcurementRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String status = "OPEN"; // OPEN, CLOSED
+    private String status = "OPEN";
 
     @Column(columnDefinition = "TEXT")
     private String note;
@@ -22,7 +22,10 @@ public class ProcurementRequest {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // Liên kết với danh sách các báo giá (ImportReceipts) nộp vào đợt này
+
     @OneToMany(mappedBy = "procurementRequest", cascade = CascadeType.ALL)
     private List<ImportReceipt> bids = new ArrayList<>();
+
+    @OneToMany(mappedBy = "procurementRequest", cascade = CascadeType.ALL)
+    private List<ProcurementRequestDetail> details = new ArrayList<>();
 }

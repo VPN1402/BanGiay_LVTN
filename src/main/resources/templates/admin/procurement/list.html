@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layouts/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh Sách Đợt Thu Mua - LVTN</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+<div layout:fragment="content" class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-cart-check text-primary"></i> Quản Lý Đợt Thu Mua</h2>
+            <p class="text-muted">Danh sách các đợt hệ thống tự động quét và yêu cầu thu mua bổ sung.</p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#generateProcurementModal">
+                <i class="bi bi-arrow-clockwise"></i> Quét Tồn Kho & Tạo Đợt Mới
+            </button>
+        </div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th class="ps-4">ID Đợt</th>
+                    <th>Ghi Chú Hệ Thống</th>
+                    <th class="text-center">Ngày Tạo</th>
+                    <th class="text-center">Trạng Thái</th>
+                    <th class="text-center">Hành Động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${requests}">
+                    <td class="ps-4 fw-bold text-primary" th:text="'#' + ${r.id}"></td>
+                    <td th:text="${r.note}"></td>
+                    <td class="text-center text-muted" th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td class="text-center">
+                            <span th:class="${r.status == 'OPEN' ? 'badge bg-success-subtle text-success' : 'badge bg-secondary-subtle text-secondary'}"
+                                  th:text="${r.status}"></span>
+                    </td>
+                    <td class="text-center">
+                        <a th:href="@{'/admin/procurement/detail/' + ${r.id}}" class="btn btn-sm btn-outline-info shadow-sm">
+                            <i class="bi bi-eye"></i> Xem Chi Tiết
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:if="${#lists.isEmpty(requests)}" class="p-5 text-center text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p>Chưa có đợt thu mua nào được tạo.</p>
+        </div>
+    </div>
+
+    <div class="modal fade" id="generateProcurementModal" tabindex="-1" aria-labelledby="generateProcurementModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4">
+                <form th:action="@{/admin/procurement/generate}" method="post">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-dark" id="generateProcurementModalLabel">
+                            <i class="bi bi-clipboard-check text-primary"></i> Xác nhận Quét kho bổ sung
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body py-3">
+                        <p class="text-muted small">Hệ thống sẽ tự động quét toàn bộ sản phẩm giày đang dưới ngưỡng an toàn để lập đợt thu mua mới. Bạn có muốn thêm ghi chú/chỉ thị đặc biệt nào cho đợt này không?</p>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-secondary">Ghi chú của Admin</label>
+                            <textarea name="note" class="form-control rounded-3" rows="3"
+                                      placeholder="Ví dụ: Đợt nhập hàng phục vụ đợt khuyến mãi quý 3, Ưu tiên các mẫu bán chạy..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary rounded-3 px-4 fw-bold shadow-sm">Bắt đầu quét kho</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div> </body>
+</html>

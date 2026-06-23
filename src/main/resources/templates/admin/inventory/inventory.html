@@ -17,6 +17,11 @@
       <h1 class="h2 fw-bold">Quản Lý Tồn Kho</h1>
       <p class="text-muted mb-0">Theo dõi số lượng hàng hóa và tình trạng tồn kho theo từng biến thể size</p>
     </div>
+    <div>
+      <a th:href="@{/admin/procurement/list}" class="btn btn-outline-primary shadow-sm rounded-pill px-4">
+        <i class="bi bi-clipboard-check"></i> Xem đợt quét tồn kho
+      </a>
+    </div>
   </div>
 
   <div class="row g-4 mb-4">
@@ -158,7 +163,24 @@
                 <input type="number" name="quantities" th:value="${ps.quantity}" class="form-control rounded-3" min="0" required/>
               </div>
             </div>
+            <div th:each="ps : ${p.productSizes}" class="mb-3 border-bottom pb-2">
+              <label class="fw-bold text-secondary mb-1">Size [[${ps.size}]]</label>
+              <div class="row g-2">
+                <div class="col-sm-6">
+                  <small class="text-muted">Tồn kho hiện tại:</small>
+                  <input type="hidden" name="productSizeIds" th:value="${ps.id}"/>
+                  <input type="number" name="quantities" th:value="${ps.quantity}" class="form-control rounded-3" min="0" required/>
+                </div>
+                <div class="col-sm-6">
+                  <small class="text-muted">Ngưỡng tối thiểu:</small>
+                  <input type="number" name="minQuantities" th:value="${ps.minQuantity != null ? ps.minQuantity : 10}"
+                         class="form-control rounded-3 border-warning" min="0" required/>
+                </div>
+              </div>
+            </div>
+
           </div>
+
 
           <div class="modal-footer border-0 pb-4 px-4">
             <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Hủy bỏ</button>

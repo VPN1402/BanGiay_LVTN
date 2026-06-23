@@ -3,14 +3,10 @@ package com.example.LVTN.controller.admin;
 import com.example.LVTN.dto.ImportDetailUpdateDTO;
 import com.example.LVTN.dto.ImportUpdateForm;
 import com.example.LVTN.dto.WarehouseCheckDTO;
-import com.example.LVTN.entity.ImportReceipt;
-import com.example.LVTN.entity.ImportReceiptDetail;
-import com.example.LVTN.entity.ProductSize;
-import com.example.LVTN.entity.User;
-import com.example.LVTN.repository.ImportReceiptDetailRepository;
-import com.example.LVTN.repository.ProductSizeRepository;
-import com.example.LVTN.repository.UserRepository;
+import com.example.LVTN.entity.*;
+import com.example.LVTN.repository.*;
 import com.example.LVTN.service.ImportReceiptService;
+import com.example.LVTN.service.ProcurementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,6 +28,13 @@ public class AdminProcurementController {
     private UserRepository userRepository;
     @Autowired
     private ProductSizeRepository productSizeRepository;
+    @Autowired
+    private ProcurementService procurementService;
+    @Autowired
+    private ProcurementRequestRepository procRequestRepo;
+    @Autowired
+    private ProcurementRequestDetailRepository procDetailRepo;
+
 
     @GetMapping("/import/list")
     public String listAllReceipts(Model model) {
@@ -170,5 +173,57 @@ public class AdminProcurementController {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
             return "redirect:/admin/import/detail/" + id;
         }
+    }
+
+    // Trang danh sách các đợt thu mua
+    @GetMapping("procurement/list")
+    public String listRequests(Model model) {
+        model.addAttribute("requests", procRequestRepo.findAll());
+        return "admin/procurement/list";
+    }
+
+    // Nút bấm để quét tồn kho và tạo đợt mới
+    @PostMapping("/procurement/generate")
+    public String generateRequest(@RequestParam(value = "note", required = false) String note,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            // Truyền tham số note vào hàm xử lý của Service
+            procurementService.generateRequestIfNeeded(note);
+
+            redirectAttributes.addFlashAttribute("successMessage", "Đã quét tồn kho hệ thống và lập đợt thu mua mới thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi phát sinh khi lập lịch thu mua: " + e.getMessage());
+        }
+        return "redirect:/admin/procurement/list";
+    }
+    @GetMapping("procurement/detail/{id}")
+    public String detailRequest(@PathVariable("id") Long id, Model model) {
+        ProcurementRequest request = procurementService.getDetailById(id);
+        model.addAttribute("request", request);
+        return "admin/procurement/detail";
+    }
+    @PostMapping("procurement/update-details")
+    public String updateDetails(@RequestParam("detailIds") List<Long> ids,
+                                @RequestParam("quantities") List<Integer> quantities) {
+        for (int i = 0; i < ids.size(); i++) {
+            ProcurementRequestDetail detail = procDetailRepo.findById(ids.get(i)).orElse(null);
+            if (detail != null) {
+                detail.setQuantityNeeded(quantities.get(i)); // Cập nhật số lượng mới
+                procDetailRepo.save(detail);
+            }
+        }
+        return "redirect:/admin/procurement/list";
+    }
+
+
+    @PostMapping("/procurement/send/{id}")
+    public String sendToSuppliers(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        ProcurementRequest request = procurementService.getDetailById(id);
+        if (request != null) {
+            request.setStatus("SENT"); // Chuyển trạng thái
+            procRequestRepo.save(request);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã gửi thông báo cho nhà cung cấp thành công!");
+        }
+        return "redirect:/admin/procurement/list";
     }
 }
