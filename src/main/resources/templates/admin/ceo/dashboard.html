@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layouts/main-layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Executive Strategic Analytics | CEO Control Panel</title>
+    <style>
+        body { background-color: #f8fafc !important; font-family: 'Inter', sans-serif; }
+        .ceo-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            transition: all 0.25s ease-in-out;
+        }
+        .ceo-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05); }
+        .metric-title { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; }
+        .metric-value { font-size: 1.85rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em; }
+        .growth-indicator { font-size: 0.8rem; font-weight: 600; padding: 4px 8px; border-radius: 6px; }
+        .panel-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 14px; color: #ffffff; }
+    </style>
+</head>
+<body>
+<div layout:fragment="content" class="container-fluid py-4 px-xl-4">
+
+    <div class="panel-header p-4 mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center shadow-sm">
+        <div>
+            <span class="badge bg-primary text-white mb-2 px-3 py-1.5 rounded-pill fw-semibold text-uppercase small" style="font-size: 0.65rem;">Hội Đồng Quản Trị</span>
+            <h3 class="fw-bold m-0 text-white">Hệ Thống Phân Tích Hiệu Suất Chiến Lược (CEO)</h3>
+            <p class="text-slate-400 small m-0 mt-1 text-white-50">Dữ liệu hợp nhất toàn chuỗi cung ứng và kinh doanh giày thể thao.</p>
+        </div>
+        <div class="mt-3 mt-md-0 d-flex gap-2">
+            <button class="btn btn-light btn-sm rounded-3 fw-semibold text-dark px-3" onclick="window.print()"><i class="bi bi-printer me-2"></i>In báo cáo</button>
+            <button class="btn btn-primary btn-sm rounded-3 fw-semibold px-3 border-secondary" style="background: #2563eb;"><i class="bi bi-calendar-range me-2"></i>Kỳ báo cáo: Năm 2026</button>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="card ceo-card p-4 h-100 border-0 shadow-sm">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="metric-title">Doanh Thu Thuần Tích Lũy</span>
+                        <div class="metric-value mt-1" th:text="${#numbers.formatDecimal(netRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                    </div>
+                    <span class="growth-indicator text-success bg-success-subtle"><i class="bi bi-graph-up-arrow me-1"></i>Realtime</span>
+                </div>
+                <div class="text-muted small mt-3"><i class="bi bi-info-circle me-1"></i>Chỉ ghi nhận từ các hóa đơn đã hoàn thành.</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card ceo-card p-4 h-100 border-0 shadow-sm">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="metric-title">Giá Trị Tài Sản Tồn Kho (Vốn Đọng)</span>
+                        <div class="metric-value mt-1 text-danger-emphasis" th:text="${#numbers.formatDecimal(deadCapital, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                    </div>
+                    <span class="icon text-warning fs-3"><i class="bi bi-cash-stack"></i></span>
+                </div>
+                <div class="text-muted small mt-3 text-secondary"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>Tổng giá trị vốn chôn tại các kệ hàng.</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card ceo-card p-4 h-100 border-0 shadow-sm">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="metric-title">Tỷ Lệ Hoàn / Hủy Đơn</span>
+                        <div class="metric-value mt-1" th:text="${returnRate}">0%</div>
+                    </div>
+                    <span class="growth-indicator text-danger bg-danger-subtle"><i class="bi bi-shield-exclamation me-1"></i>Rủi ro</span>
+                </div>
+                <div class="text-muted small mt-3"><i class="bi bi-activity me-1"></i>Ngưỡng an toàn khuyến nghị của ERP là &lt; 5%.</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card ceo-card p-4 h-100 border-0 shadow-sm">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="metric-title">Trung Tâm Phân Phối / Tổng Kho</span>
+                        <div class="metric-value mt-1" th:text="${totalBranches} + ' Trung Tâm'">1 Trung Tâm</div>
+                    </div>
+                    <span class="icon text-primary fs-3"><i class="bi bi-building-gear"></i></span>
+                </div>
+                <div class="text-muted small mt-3"><i class="bi bi-geo-alt me-1"></i>Quản lý bằng giải pháp mã QR thông minh.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+            <div class="card ceo-card p-4 border-0 shadow-sm">
+                <div class="mb-3">
+                    <h6 class="fw-bold text-dark m-0"><i class="bi bi-bezier2 me-2 text-primary"></i>Biểu Đồ Xu Hướng Doanh Thu Năm Nay</h6>
+                    <small class="text-muted">Phân tích tốc độ tăng trưởng dòng tiền (Đơn vị: Triệu VNĐ).</small>
+                </div>
+                <div style="position: relative; height:320px;">
+                    <canvas id="ceoRevenueLineChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card ceo-card p-4 border-0 shadow-sm">
+                <div class="mb-3">
+                    <h6 class="fw-bold text-dark m-0"><i class="bi bi-pie-chart me-2 text-success"></i>Cơ Cấu Doanh Thu Theo Thương Hiệu</h6>
+                    <small class="text-muted">Tỷ lệ đóng góp phần trăm (%) doanh số của các nhãn hàng giày.</small>
+                </div>
+                <div style="position: relative; height:320px;">
+                    <canvas id="ceoBrandHorizontalBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("=== ĐANG KHỞI TẠO BIỂU ĐỒ CEO DASHBOARD ===");
+
+            // 1. Cấu hình Biểu đồ đường Doanh thu
+            const trendLabels = /*[[${trendLabels}]]*/ [];
+            const trendData = /*[[${trendData}]]*/ [];
+
+            console.log("Dữ liệu biểu đồ đường xu hướng:", { labels: trendLabels, data: trendData });
+
+            if (trendLabels && trendLabels.length > 0) {
+                const ctxLine = document.getElementById('ceoRevenueLineChart').getContext('2d');
+
+                // Đổ màu Gradient bóng mờ phía dưới đường line
+                const gradient = ctxLine.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
+                gradient.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
+
+                new Chart(ctxLine, {
+                    type: 'line',
+                    data: {
+                        labels: trendLabels,
+                        datasets: [{
+                            label: 'Doanh thu thực tế (Triệu đ)',
+                            data: trendData,
+                            borderColor: '#2563eb',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#2563eb',
+                            pointHoverRadius: 6,
+                            fill: true,
+                            backgroundColor: gradient,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: '#64748b' } },
+                            y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }
+                        }
+                    }
+                });
+            } else {
+                console.warn("Cảnh báo: Không thể vẽ biểu đồ đường vì danh sách dữ liệu rỗng (kiểm tra Database xem có đơn hàng thành công nào trong năm nay chưa).");
+            }
+
+            // 2. Cấu hình Biểu đồ thanh ngang Thị phần hãng giày
+            const brandLabels = /*[[${brandLabels}]]*/ [];
+            const brandData = /*[[${brandData}]]*/ [];
+
+            console.log("Dữ liệu biểu đồ thị phần nhãn hàng:", { labels: brandLabels, data: brandData });
+
+            if (brandLabels && brandLabels.length > 0) {
+                const ctxHorizontal = document.getElementById('ceoBrandHorizontalBarChart').getContext('2d');
+                new Chart(ctxHorizontal, {
+                    type: 'bar',
+                    options: {
+                        indexAxis: 'y', // Biến đổi cột đứng thành cột ngang
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: {
+                                max: 100,
+                                ticks: { callback: value => value + '%', color: '#64748b' },
+                                grid: { color: '#f1f5f9' }
+                            },
+                            y: { grid: { display: false }, ticks: { color: '#64748b' } }
+                        }
+                    },
+                    data: {
+                        labels: brandLabels,
+                        datasets: [{
+                            data: brandData,
+                            backgroundColor: '#0f172a',
+                            borderRadius: 6,
+                            barThickness: 16
+                        }]
+                    }
+                });
+            } else {
+                console.warn("Cảnh báo: Không thể vẽ biểu đồ ngang vì chưa có dữ liệu bán hàng theo thương hiệu tương ứng.");
+            }
+        });
+    </script>
+</div> </body>
+</html>

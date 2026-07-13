@@ -53,17 +53,17 @@ public class AdminSupplierController {
             @RequestParam(value = "supplierPhone", required = false) String supplierPhone,
             @RequestParam(value = "address", required = false) String address,
             @RequestParam("fullName") String fullName,
-            @RequestParam("supplierEmail") String supplierEmail, // Khớp 100% với HTML
-            @RequestParam("userEmail") String userEmail,         // ĐÃ SỬA: Đổi từ "email" thành "userEmail" để khớp với HTML
+            @RequestParam("supplierEmail") String supplierEmail,
+            @RequestParam("userEmail") String userEmail,
             @RequestParam(value = "userPhone", required = false) String userPhone,
             @RequestParam("password") String password,
             RedirectAttributes redirectAttributes) {
 
-        // Làm sạch dữ liệu email tài khoản đăng nhập
+
         String cleanUserEmail = (userEmail != null) ? userEmail.trim() : "";
 
         try {
-            // 1. Kiểm tra xem Email đăng nhập này đã có ai dùng chưa
+
             if (!cleanUserEmail.isEmpty()) {
                 User existingUser = userRepository.findByEmail(cleanUserEmail).orElse(null);
                 if (existingUser != null) {
@@ -72,22 +72,22 @@ public class AdminSupplierController {
                 }
             }
 
-            // BƯỚC A: Khởi tạo và lưu thông tin Nhà Cung Cấp mới
+            // Khởi tạo và lưu thông tin Nhà Cung Cấp mới
             Supplier supplier = new Supplier();
             supplier.setName(name);
-            supplier.setEmail(supplierEmail.trim()); // Lưu Email của doanh nghiệp
+            supplier.setEmail(supplierEmail.trim());
             supplier.setPhone(supplierPhone);
             supplier.setAddress(address);
             supplier = supplierRepository.save(supplier);
 
-            // BƯỚC B: Khởi tạo Tài khoản đăng nhập cho Nhà Cung Cấp này
+            // Khởi tạo Tài khoản đăng nhập cho Nhà Cung Cấp này
             User user = new User();
             user.setFullName(fullName);
-            user.setEmail(cleanUserEmail); // Lưu Email đăng nhập của người đại diện
+            user.setEmail(cleanUserEmail);
             user.setPhone(userPhone);
             user.setStatus(1);
 
-            // Mã hóa mật khẩu bảo mật
+
             user.setPassword(passwordEncoder.encode(password));
 
             // Tìm và gán quyền ROLE_SUPPLIER
@@ -99,17 +99,17 @@ public class AdminSupplierController {
             }
             user.setRole(supplierRole);
 
-            // LIÊN KẾT: Gán nhà cung cấp vừa tạo vào tài khoản user này (Khóa ngoại)
+
             user.setSupplier(supplier);
 
-            // Lưu tài khoản xuống DB
+
             userRepository.save(user);
 
             redirectAttributes.addFlashAttribute("successMessage", "Đã thêm nhà cung cấp thành công và cấp tài khoản: " + cleanUserEmail);
             return "redirect:/admin/suppliers/add";
 
         } catch (Exception e) {
-            e.printStackTrace(); // In lỗi thật ra console để kiểm tra nếu có biến cố khác
+            e.printStackTrace();
             redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi hệ thống xảy ra: " + e.getMessage());
             return "redirect:/admin/suppliers/add";
         }

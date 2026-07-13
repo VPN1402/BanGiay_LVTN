@@ -15,6 +15,8 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Order order;
 
     @ManyToOne

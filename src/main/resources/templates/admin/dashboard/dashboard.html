@@ -1,286 +1,311 @@
 <!DOCTYPE html>
-<html lang="en"
+<html lang="vi"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/layouts/main-layout}">
-
 <head>
-    <title>Dashboard</title>
+    <meta charset="UTF-8">
+    <title>Dashboard Thống Kê</title>
+
 </head>
-
 <body>
+<div layout:fragment="content" class="container py-4">
 
-<div layout:fragment="content">
-
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center pt-3 pb-3 mb-4 border-bottom">
-
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-light">
         <div>
-
-            <h1 class="h2 fw-bold">
-                Dashboard Admin
-            </h1>
-
-            <p class="text-muted mb-0">
-                Tổng quan hệ thống quản lý shop giày
-            </p>
-
+            <h4 class="fw-bold text-dark mb-1">
+                <i class="bi bi-grid-1x2-fill text-primary me-2"></i>Hệ Thống Quản Trị & Báo Cáo Chiến Lược
+            </h4>
+            <p class="text-muted small mb-0">Phân tích dữ liệu thời gian thực cho chuỗi cửa hàng giày thể thao.</p>
         </div>
-
+        <div class="text-end d-none d-md-block">
+            <span class="badge bg-light text-dark border px-3 py-2 rounded-3 fw-medium">
+                <i class="bi bi-clock-history text-primary me-1"></i> Cập nhật: Hệ thống Realtime
+            </span>
+        </div>
     </div>
 
-    <!-- STATS -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 kpi-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted fw-semibold small text-uppercase mb-1">Sản phẩm KD</h6>
+                        <h3 class="fw-bold text-dark m-0" th:text="${totalProducts}">0</h3>
+                    </div>
+                    <div class="icon-shape bg-primary-subtle text-primary">
+                        <i class="bi bi-box-seam-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 kpi-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted fw-semibold small text-uppercase mb-1">Tồn kho hiện tại</h6>
+                        <h3 class="fw-bold text-dark m-0" th:text="${totalStock}">0</h3>
+                    </div>
+                    <div class="icon-shape bg-success-subtle text-success">
+                        <i class="bi bi-house-door-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 kpi-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted fw-semibold small text-uppercase mb-1">Cảnh báo hết hàng</h6>
+                        <h3 class="fw-bold text-dark m-0" th:text="${lowStockCount}">0</h3>
+                    </div>
+                    <div class="icon-shape bg-warning-subtle text-warning">
+                        <i class="bi bi-exclamation-octagon-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 kpi-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted fw-semibold small text-uppercase mb-1">Hàng bán chậm</h6>
+                        <h3 class="fw-bold text-dark m-0" th:text="${slowProductsCount}">0</h3>
+                    </div>
+                    <div class="icon-shape bg-danger-subtle text-danger">
+                        <i class="bi bi-graph-down-arrow fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 kpi-card">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted fw-semibold small text-uppercase mb-1">Tổng doanh thu</h6>
+                        <h4 class="fw-bold text-dark m-0 mt-1" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</h4>
+                    </div>
+                    <div class="icon-shape bg-info-subtle text-info">
+                        <i class="bi bi-currency-dollar fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4 mb-4">
-
-        <!-- PRODUCTS -->
-        <div class="col-md-3">
-
-            <div class="card border-0 shadow rounded-4 h-100">
-
-                <div class="card-body">
-
-                    <div class="d-flex justify-content-between align-items-center">
-
-                        <div>
-
-                            <p class="text-muted mb-1">
-                                Sản phẩm
-                            </p>
-
-                            <h2 class="fw-bold"
-                                th:text="${totalProducts}">
-                                0
-                            </h2>
-
-                        </div>
-
-                        <i class="bi bi-box-seam fs-1 text-primary"></i>
-
-                    </div>
-
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="mb-3">
+                    <h6 class="fw-bold text-dark mb-1"><i class="bi bi-bar-chart-line-fill text-primary me-2"></i>Đồ Thị Tốc Độ Tiêu Thụ Sản Phẩm</h6>
+                    <small class="text-muted">Top 5 sản phẩm đạt sản lượng phân phối cao nhất toàn chuỗi.</small>
                 </div>
-
+                <div style="position: relative; height:320px;">
+                    <canvas id="enterpriseBarChart"></canvas>
+                </div>
             </div>
-
         </div>
-
-        <!-- CATEGORY -->
-        <div class="col-md-3">
-
-            <div class="card border-0 shadow rounded-4 h-100">
-
-                <div class="card-body">
-
-                    <div class="d-flex justify-content-between align-items-center">
-
-                        <div>
-
-                            <p class="text-muted mb-1">
-                                Danh mục
-                            </p>
-
-                            <h2 class="fw-bold"
-                                th:text="${totalCategories}">
-                                0
-                            </h2>
-
-                        </div>
-
-                        <i class="bi bi-tags fs-1 text-success"></i>
-
-                    </div>
-
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="mb-3">
+                    <h6 class="fw-bold text-dark mb-1"><i class="bi bi-pie-chart-fill text-info me-2"></i>Cấu Trúc An Toàn Kho</h6>
+                    <small class="text-muted">Tỷ lệ cân đối giữa hàng an toàn và thiếu hụt.</small>
                 </div>
-
-            </div>
-
-        </div>
-
-        <!-- USERS -->
-        <div class="col-md-3">
-
-            <div class="card border-0 shadow rounded-4 h-100">
-
-                <div class="card-body">
-
-                    <div class="d-flex justify-content-between align-items-center">
-
-                        <div>
-
-                            <p class="text-muted mb-1">
-                                Người dùng
-                            </p>
-
-                            <h2 class="fw-bold"
-                                th:text="${totalUsers}">
-                                0
-                            </h2>
-
-                        </div>
-
-                        <i class="bi bi-people fs-1 text-danger"></i>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- BRANDS -->
-        <div class="col-md-3">
-
-            <div class="card border-0 shadow rounded-4 h-100">
-
-                <div class="card-body">
-
-                    <div class="d-flex justify-content-between align-items-center">
-
-                        <div>
-
-                            <p class="text-muted mb-1">
-                                Thương hiệu
-                            </p>
-
-                            <h2 class="fw-bold"
-                                th:text="${totalBrands}">
-                                0
-                            </h2>
-
-                        </div>
-
-                        <i class="bi bi-award fs-1 text-warning"></i>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- TABLE -->
-    <div class="row g-4">
-
-        <!-- PRODUCT TABLE -->
-        <div class="col-lg-7">
-
-            <div class="card border-0 shadow rounded-4">
-
-                <div class="card-header bg-white border-0 pt-4">
-
-                    <h5 class="fw-bold">
-                        Sản phẩm mới
-                    </h5>
-
-                </div>
-
-                <div class="card-body">
-
-                    <div class="table-responsive">
-
-                        <table class="table align-middle">
-
-                            <thead>
-
-                            <tr>
-
-                                <th>ID</th>
-
-                                <th>Tên sản phẩm</th>
-
-                                <th>Giá</th>
-
-                            </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                            <tr th:each="p : ${products}">
-
-                                <td th:text="${p.id}"></td>
-
-                                <td th:text="${p.name}"></td>
-
-                                <td class="text-danger fw-bold">
-
-                                    <span th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')}"></span> đ
-
-                                </td>
-
-                            </tr>
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- USER TABLE -->
-        <div class="col-lg-5">
-
-            <div class="card border-0 shadow rounded-4">
-
-                <div class="card-header bg-white border-0 pt-4">
-
-                    <h5 class="fw-bold">
-                        Người dùng mới
-                    </h5>
-
-                </div>
-
-                <div class="card-body">
-
-                    <div class="table-responsive">
-
-                        <table class="table align-middle">
-
-                            <thead>
-
-                            <tr>
-
-                                <th>ID</th>
-
-                                <th>Họ tên</th>
-
-                                <th>Role</th>
-
-                            </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                            <tr th:each="u : ${users}">
-
-                                <td th:text="${u.id}"></td>
-
-                                <td th:text="${u.fullName}"></td>
-
-                                <td>
-
-                                    <span class="badge bg-primary">
-                                        <span th:text="${u.role != null ? u.role.roleName : 'USER'}"></span>
-                                    </span>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div style="position: relative; height:280px;" class="d-flex justify-content-center align-items-center">
+                    <canvas id="enterprisePieChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white h-100">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold m-0 text-success"><i class="bi bi-arrow-up-right-circle-fill me-2"></i>Top 5 Sản Phẩm Bán Chạy</h6>
+                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 small fw-semibold">Hiệu suất cao</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-secondary small text-uppercase">
+                        <tr>
+                            <th class="ps-4 py-3">Tên sản phẩm</th>
+                            <th class="text-center py-3">Đã bán</th>
+                            <th class="text-center py-3">Kho hiện tại</th>
+                        </tr>
+                        </thead>
+                        <tbody class="small">
+                        <tr th:each="p : ${topSellingProducts}" class="border-bottom border-light">
+                            <td class="ps-4 fw-semibold text-dark py-3" th:text="${p.productName}"></td>
+                            <td class="text-center fw-bold text-success py-3" th:text="${p.totalSold} + ' đôi'"></td>
+                            <td class="text-center text-muted py-3" th:text="${p.currentStock}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white h-100">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold m-0 text-danger"><i class="bi bi-arrow-down-left-circle-fill me-2"></i>Top 5 Sản Phẩm Bán Chậm</h6>
+                    <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2 small fw-semibold">Cần giải phóng kho</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-secondary small text-uppercase">
+                        <tr>
+                            <th class="ps-4 py-3">Tên sản phẩm</th>
+                            <th class="text-center py-3">Đã bán</th>
+                            <th class="text-center py-3">Kho tồn đọng</th>
+                        </tr>
+                        </thead>
+                        <tbody class="small">
+                        <tr th:each="p : ${topSlowProducts}" class="border-bottom border-light">
+                            <td class="ps-4 fw-semibold text-dark py-3" th:text="${p.productName}"></td>
+                            <td class="text-center fw-bold text-danger py-3" th:text="${p.totalSold} + ' đôi'"></td>
+                            <td class="text-center text-muted py-3" th:text="${p.currentStock}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center flex-wrap g-2">
+                    <div>
+                        <h6 class="fw-bold m-0 text-dark"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Kế Hoạch Cảnh Báo Ngưỡng Tồn Kho An Toàn</h6>
+                        <small class="text-muted">Hệ thống tự động rà soát các biến thể size giày tụt xuống dưới định mức tối thiểu.</small>
+                    </div>
+                    <a th:href="@{/admin/procurement/list}" class="btn btn-dark rounded-3 fw-semibold px-4 py-2 small shadow-sm">
+                        <i class="bi bi-plus-circle me-2"></i>Lập lệnh nhập hàng khẩn cấp
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-secondary small text-uppercase">
+                        <tr>
+                            <th class="ps-4 py-3">Mã SP</th>
+                            <th class="py-3">Sản phẩm & Kích thước</th>
+                            <th class="text-center py-3">Tồn thực tế</th>
+                            <th class="text-center py-3">Ngưỡng tối thiểu</th>
+                            <th class="text-center py-3">Trạng thái vận hành</th>
+                        </tr>
+                        </thead>
+                        <tbody class="small">
+                        <tr th:each="item : ${lowStockItems}" class="border-bottom border-light">
+                            <td class="ps-4 font-monospace text-muted" th:text="'PROD-' + ${item.product.id}"></td>
+                            <td>
+                                <span class="fw-bold text-dark" th:text="${item.product.name}"></span>
+                                <span class="badge bg-light text-secondary border border-light ms-2 px-2 py-1" th:text="'Size ' + ${item.size}"></span>
+                            </td>
+                            <td class="text-center fw-bold text-danger fs-6 py-3" th:text="${item.quantity}"></td>
+                            <td class="text-center text-muted fw-medium py-3" th:text="${item.minQuantity}"></td>
+                            <td class="text-center py-3">
+                                <span th:if="${item.quantity == 0}" class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill fw-semibold">Hết sạch hàng (Nguy cấp)</span>
+                                <span th:if="${item.quantity > 0}" class="badge bg-warning-subtle text-warning-emphasis px-3 py-2 rounded-pill fw-semibold">Dưới ngưỡng an toàn</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(lowStockItems)}">
+                            <td colspan="5" class="text-center text-muted py-5">
+                                <i class="bi bi-shield-check text-success fs-1 d-block mb-2"></i>
+                                <h6 class="fw-bold mb-0 text-dark">Trạng thái lý tưởng: Không có sản phẩm nào chạm ngưỡng cảnh báo.</h6>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+
+
+            const colors = {
+                primary: 'rgba(79, 70, 229, 0.85)',
+                primaryBorder: 'rgb(79, 70, 229)',
+                success: 'rgba(16, 185, 129, 0.85)',
+                danger: 'rgba(244, 63, 94, 0.85)'
+            };
+
+            // 1. Cấu hình Biểu đồ cột (Tốc độ tiêu thụ)
+            const barLabels = /*[[${barChartLabels}]]*/ [];
+            const barData = /*[[${barChartData}]]*/ [];
+
+            if (barLabels && barLabels.length > 0) {
+                const ctxBar = document.getElementById('enterpriseBarChart').getContext('2d');
+                new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: barLabels,
+                        datasets: [{
+                            label: 'Sản lượng tiêu thụ (đôi)',
+                            data: barData,
+                            backgroundColor: colors.primary,
+                            borderColor: colors.primaryBorder,
+                            borderWidth: 1.5,
+                            borderRadius: 6,
+                            barThickness: 28
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1, color: '#94a3b8' },
+                                grid: { color: '#f1f5f9' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // 2. Cấu hình Biểu đồ tròn dạng bánh Doughnut (Tỷ lệ an toàn kho)
+            const pieLabels = /*[[${pieChartLabels}]]*/ [];
+            const pieData = /*[[${pieChartData}]]*/ [];
+
+            if (pieLabels && pieLabels.length > 0) {
+                const ctxPie = document.getElementById('enterprisePieChart').getContext('2d');
+                new Chart(ctxPie, {
+                    type: 'doughnut',
+                    data: {
+                        labels: pieLabels,
+                        datasets: [{
+                            data: pieData,
+                            backgroundColor: [colors.success, colors.danger],
+                            borderWidth: 3,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%', // Tạo vòng bánh mảnh, sang trọng hơn
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 12, padding: 20, font: { size: 12 } }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </div>
 </body>
 </html>

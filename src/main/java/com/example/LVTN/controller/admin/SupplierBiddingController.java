@@ -45,29 +45,29 @@ public class SupplierBiddingController {
     private ProcurementRequestRepository procRequestRepo;
 
 
-    @GetMapping("/bid/create") // Hoặc đường dẫn GET hiển thị form này của bạn
+    @GetMapping("/bid/create")
     public String showImportStockForm(Model model, Principal principal) {
-        List<Supplier> allSuppliers = supplierRepository.findAll(); // hoặc supplierRepository.findAll()
+        List<Supplier> allSuppliers = supplierRepository.findAll();
         model.addAttribute("allSuppliers", allSuppliers);
         if (principal != null) {
-            String loggedInEmail = principal.getName(); // Lấy email tài khoản đang đăng nhập
+            String loggedInEmail = principal.getName();
 
-            // Dùng userService (hoặc userRepository) để tìm thực thể User đầy đủ thông tin trong DB
+
             User currentUser = userService.findByEmail(loggedInEmail);
 
             if (currentUser != null) {
-                // Đẩy tên đầy đủ (fullName) và thông tin Nhà cung cấp sang giao diện
+
                 model.addAttribute("supplierName", currentUser.getFullName());
 
-                // Nếu bạn cần bốc thêm ID nhà cung cấp để lát lưu dữ liệu:
+
                 if (currentUser.getSupplier() != null) {
                     model.addAttribute("currentSupplierId", currentUser.getSupplier().getId());
                 }
             }
         }
 
-        // Thêm các dữ liệu khác nếu có (ví dụ: danh sách sản phẩm...)
-        return "admin/supplier/import-stock"; // Trỏ đúng về file HTML đang bị lỗi của bạn
+
+        return "admin/supplier/import-stock";
     }
 
     // 2. Xử lý đọc file CSV báo giá từ Nhà Cung Cấp
@@ -83,7 +83,7 @@ public class SupplierBiddingController {
                 return "redirect:/supplier/bid/create/" + requestId;
             }
 
-            // 1. Kiểm tra nhà cung cấp đăng nhập
+
             User loggedInUser = userService.findByEmail(principal.getName());
             if (loggedInUser == null || loggedInUser.getSupplier() == null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Tài khoản chưa được liên kết với Nhà Cung Cấp!");
@@ -98,19 +98,19 @@ public class SupplierBiddingController {
                 return "redirect:/supplier/bid/list";
             }
 
-            // 3. Khởi tạo Phiếu báo giá (ImportReceipt)
+            //khoi tao phieu bao gia
             ImportReceipt receipt = new ImportReceipt();
             receipt.setSupplier(currentSupplier);
             receipt.setUser(loggedInUser);
             receipt.setNote(note);
             receipt.setStatus("PENDING");
 
-            // QUAN TRỌNG: Gán đợt thu mua vào phiếu báo giá
+
             receipt.setProcurementRequest(request);
 
             List<ImportReceiptDetail> detailsList = new ArrayList<>();
 
-            // 4. Đọc file CSV
+            //  Đọc file CSV
             try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"))) {
                 String line;
                 boolean isHeader = true;
@@ -132,7 +132,7 @@ public class SupplierBiddingController {
                             ImportReceiptDetail detail = new ImportReceiptDetail();
                             detail.setImportReceipt(receipt);
                             detail.setProductSize(ps);
-                            detail.setQuantity(reqQty); // Dùng cho số lượng thực tế
+                            detail.setQuantity(reqQty);
                             detail.setRequestedQuantity(reqQty);
                             detail.setImportPrice(price);
                             detail.setApprovedQuantity(0);
@@ -156,7 +156,7 @@ public class SupplierBiddingController {
 
             receipt.setDetails(detailsList);
 
-            // 5. Lưu vào Database
+
             importReceiptService.saveDraftReceipt(receipt);
 
             redirectAttributes.addFlashAttribute("successMessage", "Nộp báo giá cho đợt #" + requestId + " thành công!");
@@ -170,7 +170,7 @@ public class SupplierBiddingController {
     }
     @GetMapping("/bid/list")
     public String listBiddableRequests(Model model) {
-        // Giả sử bạn có repository để lọc theo trạng thái
+
         model.addAttribute("requests", procRequestRepo.findByStatus("SENT"));
         return "admin/supplier/bid-list";
     }
@@ -178,17 +178,17 @@ public class SupplierBiddingController {
     // Khi nhấn "Nộp báo giá" từ trang danh sách, truyền ID qua
     @GetMapping("/bid/create/{requestId}")
     public String showImportStockForm(@PathVariable("requestId") Long requestId, Model model) {
-        // Tìm đợt thu mua để đẩy sang HTML
+
         ProcurementRequest request = procRequestRepo.findById(requestId).orElse(null);
         model.addAttribute("request", request);
         model.addAttribute("requestId", requestId);
 
-        // Đẩy danh sách nhà cung cấp (nếu cần)
+
         model.addAttribute("allSuppliers", supplierRepository.findAll());
 
         return "admin/supplier/import-stock";
     }
-    // 1. Hàm hiển thị trang CHI TIẾT đợt thu mua
+    //trang chi tiet
     @GetMapping("/bid/detail/{id}")
     public String viewBidDetail(@PathVariable("id") Long id, Model model) {
         ProcurementRequest request = procRequestRepo.findById(id).orElse(null);
@@ -196,10 +196,9 @@ public class SupplierBiddingController {
             return "redirect:/supplier/bid/list";
         }
         model.addAttribute("request", request);
-        return "admin/supplier/bid-detail"; // Tạo file HTML mới ở Bước 3
+        return "admin/supplier/bid-detail";
     }
 
-    // 2. Hàm TỰ ĐỘNG TẠO VÀ CHO TẢI FILE CSV MẪU (Chuẩn doanh nghiệp)
     @GetMapping("/bid/export-csv/{id}")
     public void exportCsvTemplate(@PathVariable("id") Long id, HttpServletResponse response) throws IOException {
         ProcurementRequest request = procRequestRepo.findById(id).orElse(null);

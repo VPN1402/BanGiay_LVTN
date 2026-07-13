@@ -6,84 +6,125 @@
 
 <head>
     <title>Quản lý đơn hàng</title>
+    <!-- Nhúng thêm Icon nếu layout tổng chưa có -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
 <body>
 
-<div layout:fragment="content">
+<div layout:fragment="content" class="container py-4">
 
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-3 mb-4 border-bottom">
-        <div>
-            <h1 class="h2 fw-bold mb-1">Quản lý đơn hàng</h1>
-            <p class="text-muted mb-0">Danh sách đơn hàng cần xử lý</p>
-        </div>
+    <!-- Tiêu đề trang gọn gàng -->
+    <div class="mb-4">
+        <h3 class="fw-bold text-dark mb-1">Quản lý đơn hàng</h3>
+        <p class="text-muted small mb-0">Danh sách đơn hàng cần xử lý (Đơn trực tuyến xếp lên đầu)</p>
     </div>
 
-    <div class="card border-0 shadow rounded-4">
-        <div class="card-body p-4">
-
+    <!-- Bảng dữ liệu tối giản -->
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table align-middle table-hover">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-secondary small">
                     <tr>
-                        <th>Mã đơn</th>
-                        <th>Độ ưu tiên</th> <th>Khách hàng</th>
+                        <th class="ps-4 py-3">Mã đơn</th>
+                        <th>Hình thức</th>
+                        <th>Khách hàng</th>
                         <th>Tổng tiền</th>
-                        <th>Trạng thái</th>
+                        <th>Trạng thái đơn</th>
                         <th>Thanh toán</th>
-                        <th class="text-center">Thao tác</th>
+                        <th class="text-center pe-4">Thao tác</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="order : ${orders}">
-                        <td class="fw-semibold text-muted" th:text="'#' + ${order.id}"></td>
+
+                    <!-- ================================================================================= -->
+                    <!-- VÒNG LẶP 1: ĐƠN THANH TOÁN VNPAY (XẾP LÊN ĐẦU) -->
+                    <!-- ================================================================================= -->
+                    <tr th:each="order : ${orders}" th:if="${order.priority == 1}">
+                        <td class="ps-4 fw-bold text-primary" th:text="'#' + ${order.id}"></td>
 
                         <td>
-            <span class="badge text-uppercase font-monospace"
-                  th:classappend="${order.priority == 1 ? 'bg-danger text-white animate-pulse' : 'bg-light text-dark border'}"
-                  th:text="${order.priority == 1 ? ' Ưu tiên 1 (Chuyển khoản)' : 'Ưu tiên 2 (COD)'}"></span>
+                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">VNPAY</span>
                         </td>
 
-                        <td th:text="${order.receiverName}"></td>
+                        <td class="fw-semibold text-dark" th:text="${order.receiverName}"></td>
 
                         <td class="fw-bold text-danger">
                             <span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'POINT', 0, 'COMMA')}"></span> đ
                         </td>
 
                         <td>
-            <span class="badge"
-                  th:classappend="${order.orderStatus == 'PENDING' ? 'bg-warning text-dark' : (order.orderStatus == 'SHIPPING' ? 'bg-info' : (order.orderStatus == 'OUT_OF_STOCK' ? 'bg-danger fw-bold' : (order.orderStatus == 'CANCELLED' ? 'bg-secondary' : 'bg-success')))}"
-                  th:text="${order.orderStatus == 'PENDING' ? 'Chờ duyệt' : (order.orderStatus == 'SHIPPING' ? 'Đang giao' : (order.orderStatus == 'OUT_OF_STOCK' ? 'Hết hàng kho ⚠️' : (order.orderStatus == 'CANCELLED' ? 'Đã hủy' : 'Hoàn thành')))}"></span>
+                            <span class="badge rounded-pill px-3 py-2"
+                                  th:classappend="${order.orderStatus == 'PENDING' ? 'bg-warning-subtle text-dark' : (order.orderStatus == 'SHIPPING' ? 'bg-info-subtle text-dark' : (order.orderStatus == 'OUT_OF_STOCK' ? 'bg-danger-subtle text-danger' : (order.orderStatus == 'CANCELLED' ? 'bg-secondary-subtle text-secondary' : 'bg-success-subtle text-success')))}"
+                                  th:text="${order.orderStatus == 'PENDING' ? 'Chờ duyệt' : (order.orderStatus == 'SHIPPING' ? 'Đang giao' : (order.orderStatus == 'OUT_OF_STOCK' ? 'Hết hàng' : (order.orderStatus == 'CANCELLED' ? 'Đã hủy' : 'Hoàn thành')))}"></span>
                         </td>
 
                         <td>
-            <span class="badge"
-                  th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success' : (order.paymentStatus == 'REFUND_PENDING' ? 'bg-warning text-dark' : (order.paymentStatus == 'REFUNDED' ? 'bg-secondary' : 'bg-dark'))}"
-                  th:text="${order.paymentStatus == 'PAID' ? 'Đã thanh toán' : (order.paymentStatus == 'REFUND_PENDING' ? 'Chờ hoàn tiền' : (order.paymentStatus == 'REFUNDED' ? 'Đã hoàn tiền' : 'Chưa thanh toán'))}"></span>
+                            <span class="badge rounded-pill px-3 py-2"
+                                  th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success-subtle text-success' : (order.paymentStatus == 'REFUND_PENDING' ? 'bg-warning-subtle text-dark' : (order.paymentStatus == 'REFUNDED' ? 'bg-secondary-subtle text-secondary' : 'bg-light text-muted border'))}"
+                                  th:text="${order.paymentStatus == 'PAID' ? 'Đã thanh toán' : (order.paymentStatus == 'REFUND_PENDING' ? 'Chờ hoàn tiền' : (order.paymentStatus == 'REFUNDED' ? 'Đã hoàn tiền' : 'Chưa thanh toán'))}"></span>
                         </td>
 
-                        <td class="text-center">
-                            <a th:href="@{'/admin/orders/details/' + ${order.id}}"
-                               class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i> Xem chi tiết
+                        <td class="text-center pe-4">
+                            <a th:href="@{'/admin/orders/details/' + ${order.id}}" class="btn btn-sm btn-outline-secondary rounded-2">
+                                <i class="bi bi-eye"></i> Xem
                             </a>
-
-                            <form th:if="${order.paymentStatus == 'REFUND_PENDING'}"
-                                  th:action="@{/admin/orders/confirm-refund}"
-                                  method="post"
-                                  class="d-inline ms-2">
+                            <form th:if="${order.paymentStatus == 'REFUND_PENDING'}" th:action="@{/admin/orders/confirm-refund}" method="post" class="d-inline ms-1">
                                 <input type="hidden" name="orderId" th:value="${order.id}" />
-                                <button type="submit" class="btn btn-sm btn-success"
-                                        onclick="return confirm('Bạn đã chuyển khoản trả tiền cho khách và muốn xác nhận ĐÃ HOÀN TIỀN cho đơn này?')">
-                                    <i class="bi bi-check2-circle"></i> Xác nhận đã hoàn tiền
+                                <button type="submit" class="btn btn-sm btn-success rounded-2" onclick="return confirm('Xác nhận đã hoàn tiền cho khách?')">
+                                    <i class="bi bi-check2"></i> Hoàn tiền
                                 </button>
                             </form>
                         </td>
                     </tr>
 
+
+                    <!-- ================================================================================= -->
+                    <!-- VÒNG LẶP 2: ĐƠN THANH TOÁN COD (XẾP PHÍA DƯỚI) -->
+                    <!-- ================================================================================= -->
+                    <tr th:each="order : ${orders}" th:if="${order.priority != 1}">
+                        <td class="ps-4 text-muted" th:text="'#' + ${order.id}"></td>
+
+                        <td>
+                            <span class="badge bg-light text-secondary border rounded-pill px-3 py-2">COD</span>
+                        </td>
+
+                        <td th:text="${order.receiverName}"></td>
+
+                        <td class="fw-semibold text-dark">
+                            <span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'POINT', 0, 'COMMA')}"></span> đ
+                        </td>
+
+                        <td>
+                            <span class="badge rounded-pill px-3 py-2"
+                                  th:classappend="${order.orderStatus == 'PENDING' ? 'bg-warning-subtle text-dark' : (order.orderStatus == 'SHIPPING' ? 'bg-info-subtle text-dark' : (order.orderStatus == 'OUT_OF_STOCK' ? 'bg-danger-subtle text-danger' : (order.orderStatus == 'CANCELLED' ? 'bg-secondary-subtle text-secondary' : 'bg-success-subtle text-success')))}"
+                                  th:text="${order.orderStatus == 'PENDING' ? 'Chờ duyệt' : (order.orderStatus == 'SHIPPING' ? 'Đang giao' : (order.orderStatus == 'OUT_OF_STOCK' ? 'Hết hàng' : (order.orderStatus == 'CANCELLED' ? 'Đã hủy' : 'Hoàn thành')))}"></span>
+                        </td>
+
+                        <td>
+                            <span class="badge rounded-pill px-3 py-2"
+                                  th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success-subtle text-success' : (order.paymentStatus == 'REFUND_PENDING' ? 'bg-warning-subtle text-dark' : (order.paymentStatus == 'REFUNDED' ? 'bg-secondary-subtle text-secondary' : 'bg-light text-muted border'))}"
+                                  th:text="${order.paymentStatus == 'PAID' ? 'Đã thanh toán' : (order.paymentStatus == 'REFUND_PENDING' ? 'Chờ hoàn tiền' : (order.paymentStatus == 'REFUNDED' ? 'Đã hoàn tiền' : 'Chưa thanh toán'))}"></span>
+                        </td>
+
+                        <td class="text-center pe-4">
+                            <a th:href="@{'/admin/orders/details/' + ${order.id}}" class="btn btn-sm btn-outline-secondary rounded-2">
+                                <i class="bi bi-eye"></i> Xem
+                            </a>
+                            <form th:if="${order.paymentStatus == 'REFUND_PENDING'}" th:action="@{/admin/orders/confirm-refund}" method="post" class="d-inline ms-1">
+                                <input type="hidden" name="orderId" th:value="${order.id}" />
+                                <button type="submit" class="btn btn-sm btn-success rounded-2" onclick="return confirm('Xác nhận đã hoàn tiền cho khách?')">
+                                    <i class="bi bi-check2"></i> Hoàn tiền
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <!-- Trạng thái không có dữ liệu -->
                     <tr th:if="${#lists.isEmpty(orders)}">
-                        <td colspan="7" class="text-center py-5 text-muted"> <i class="bi bi-box-seam fs-1 d-block mb-3"></i>
-                            Chưa có đơn hàng nào
+                        <td colspan="7" class="text-center py-4 text-muted bg-white small">
+                            Chưa có đơn hàng nào trong danh sách.
                         </td>
                     </tr>
                     </tbody>

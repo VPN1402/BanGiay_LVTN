@@ -18,4 +18,8 @@ public interface ProductSizeRepository extends JpaRepository<ProductSize, Long> 
     // Câu truy vấn JPQL tìm sản phẩm có số lượng nhỏ hơn ngưỡng tối thiểu
     @Query("SELECT ps FROM ProductSize ps WHERE ps.quantity < ps.minQuantity")
     List<ProductSize> findAllLowStock();
+
+    // Tính tổng số lượng hàng hóa đang nằm trong kho
+    @Query("SELECT COALESCE(SUM(ps.quantity), 0) FROM ProductSize ps")
+    Integer calculateTotalStock();
 }
