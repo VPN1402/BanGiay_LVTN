@@ -5,6 +5,7 @@ import com.example.LVTN.entity.*;
 import com.example.LVTN.enums.OrderStatus;
 import com.example.LVTN.enums.PaymentStatus;
 import com.example.LVTN.repository.*;
+import com.example.LVTN.service.ActivityLogService;
 import com.example.LVTN.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class OrderServiceImpl implements OrderService {
     @Autowired private CartRepository cartRepository;
     @Autowired private CartItemRepository cartItemRepository;
     @Autowired private ProductSizeRepository productSizeRepository;
+    @Autowired private ActivityLogService activityLogService;
 
     @Override
     public List<Order> findAll() {
@@ -104,45 +106,6 @@ public class OrderServiceImpl implements OrderService {
         return savedOrder;
     }
 
-    // ===== NGHIỆP VỤ MỚI: XỬ LÝ SUBMIT XUẤT KHO THỰC TẾ + CHỐNG MẤT CẮP =====
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public String submitXuatKho(Long orderId, String usernameNhanVien) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
-
-        // 1. Kiểm tra tồn kho thực tế ngay tại thời điểm nhân viên bấm Submit
-        for (OrderItem item : order.getOrderItems()) {
-            ProductSize ps = productSizeRepository.findByProductIdAndSize(
-                    item.getProduct().getId(), item.getSize()
-            ).orElse(null);
-
-            // Nếu trong lúc chờ submit mà hàng đã bị đơn khác mua hết
-            if (ps == null || ps.getQuantity() < item.getQuantity()) {
-                order.setOrderStatus("OUT_OF_STOCK"); // Chuyển trạng thái đơn thành HẾT HÀNG để báo Admin xử lý với NCC/Khách
-                orderRepository.save(order);
-                return "FAILED_OUT_OF_STOCK";
-            }
-        }
-
-        // 2. Nếu tất cả sản phẩm đều đủ số lượng -> Tiến hành trừ kho thực tế
-        for (OrderItem item : order.getOrderItems()) {
-            ProductSize ps = productSizeRepository.findByProductIdAndSize(
-                    item.getProduct().getId(), item.getSize()
-            ).orElseThrow(() -> new RuntimeException("Lỗi hệ thống khi đối chiếu kho"));
-
-            ps.setQuantity(ps.getQuantity() - item.getQuantity());
-            productSizeRepository.save(ps);
-        }
-
-        // 3. Đổi trạng thái đơn sang đang giao và LƯU DANH TÍNH người xác nhận để chống gian lận
-        order.setOrderStatus("SHIPPING"); // Đang giao hàng
-        order.setProcessedBy(usernameNhanVien); // Lưu username nhân viên bấm nút
-        order.setProcessedAt(LocalDateTime.now()); // Lưu thời gian bấm
-        orderRepository.save(order);
-
-        return "SUCCESS";
-    }
 
     // ===== NGHIỆP VỤ MỚI: LẤY DANH SÁCH ĐƠN HÀNG XẾP THEO ĐỘ ƯU TIÊN VÀ THỜI GIAN =====
     @Override
@@ -246,5 +209,63 @@ public class OrderServiceImpl implements OrderService {
         }
 
         orderRepository.save(order);
+    }
+
+    // ===== VÍ DỤ 1: Ghi log khi Nhân viên bấm Xuất Kho =====
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String submitXuatKho(Long orderId, String usernameNhanVien) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        // 1. Kiểm tra tồn kho thực tế
+        for (OrderItem item : order.getOrderItems()) {
+            ProductSize ps = productSizeRepository.findByProductIdAndSize(
+                    item.getProduct().getId(), item.getSize()
+            ).orElse(null);
+
+            if (ps == null || ps.getQuantity() < item.getQuantity()) {
+                order.setOrderStatus("OUT_OF_STOCK");
+                orderRepository.save(order);
+
+                // GHI LOG: Báo sự cố hết hàng
+                activityLogService.log(
+                        null,
+                        usernameNhanVien,
+                        "NHÂN VIÊN KHO",
+                        "XUẤT KHO THẤT BẠI",
+                        "Đơn hàng #" + orderId + " bị hủy xuất kho do thiếu sản phẩm size " + item.getSize()
+                );
+
+                return "FAILED_OUT_OF_STOCK";
+            }
+        }
+
+        // 2. Trừ kho thực tế
+        for (OrderItem item : order.getOrderItems()) {
+            ProductSize ps = productSizeRepository.findByProductIdAndSize(
+                    item.getProduct().getId(), item.getSize()
+            ).orElseThrow(() -> new RuntimeException("Lỗi hệ thống khi đối chiếu kho"));
+
+            ps.setQuantity(ps.getQuantity() - item.getQuantity());
+            productSizeRepository.save(ps);
+        }
+
+        // 3. Đổi trạng thái đơn sang SHIPPING
+        order.setOrderStatus("SHIPPING");
+        order.setProcessedBy(usernameNhanVien);
+        order.setProcessedAt(LocalDateTime.now());
+        orderRepository.save(order);
+
+        // GHI LOG THÀNH CÔNG CHO CEO THẤY[cite: 6, 8]
+        activityLogService.log(
+                null,
+                usernameNhanVien,
+                "NHÂN VIÊN KHO",
+                "DUYỆT XUẤT KHO",
+                "Đã xuất kho thành công cho đơn hàng #" + orderId
+        );
+
+        return "SUCCESS";
     }
 }

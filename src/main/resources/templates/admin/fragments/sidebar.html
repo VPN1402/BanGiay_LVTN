@@ -1,37 +1,46 @@
 <nav id="sidebar" th:fragment="sidebar" xmlns:sec="http://www.w3.org/1999/xhtml">
     <div class="sidebar-header">
-        <h3><i class="bi bi-cart3"></i> E-Admin</h3>
+        <h3>
+            <i class="bi bi-cart3"></i>
+            <span sec:authorize="hasRole('SUPPLIER')">Portal NCC</span>
+            <span sec:authorize="!hasRole('SUPPLIER')">E-Admin</span>
+        </h3>
     </div>
 
     <ul class="list-unstyled components">
-        <li>
-            <a th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
-        </li>
-        <li>
-            <a th:href="@{/admin/products}"><i class="bi bi-box-seam"></i> Products</a>
-        </li>
-        <li>
-            <a th:href="@{/admin/categories}"><i class="bi bi-tags"></i> Categories</a>
-        </li>
-        <li>
-            <a th:href="@{/admin/users}"><i class="bi bi-people"></i> Users</a>
-        </li>
-        <li>
-            <a th:href="@{/admin/inventory}"><i class="bi bi-archive"></i> Inventory</a>
-        </li>
-        <li>
-            <a th:href="@{/admin/contacts}"><i class="bi bi-envelope"></i> Contact</a>
-        </li>
-        <li>
-            <a th:href="@{/admin/import/list}"><i class="bi bi-box-seam"></i> Import Receipts</a>
-        </li>
-        <li>
-            <a th:href="@{/admin/suppliers}"><i class="bi bi-truck"></i> Supplier</a>
-        </li>
-        <li>
-            <a th:href="@{/admin/orders}"><i class="bi bi-truck"></i> Quản Lý Đơn Hàng</a>
-        </li>
-        <li class="nav-item mt-4 pt-3 border-top">
+
+       
+        <div sec:authorize="!hasRole('SUPPLIER')">
+            <li>
+                <a th:href="@{/admin/dashboard}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            </li>
+            <li>
+                <a th:href="@{/admin/products}"><i class="bi bi-box-seam"></i> Products</a>
+            </li>
+            <li>
+                <a th:href="@{/admin/categories}"><i class="bi bi-tags"></i> Categories</a>
+            </li>
+            <li>
+                <a th:href="@{/admin/users}"><i class="bi bi-people"></i> Users</a>
+            </li>
+            <li>
+                <a th:href="@{/admin/inventory}"><i class="bi bi-archive"></i> Inventory</a>
+            </li>
+            <li>
+                <a th:href="@{/admin/contacts}"><i class="bi bi-envelope"></i> Contact</a>
+            </li>
+            <li>
+                <a th:href="@{/admin/import/list}"><i class="bi bi-box-seam"></i> Import Receipts</a>
+            </li>
+            <li>
+                <a th:href="@{/admin/suppliers}"><i class="bi bi-truck"></i> Supplier</a>
+            </li>
+            <li>
+                <a th:href="@{/admin/orders}"><i class="bi bi-truck"></i> Quản Lý Đơn Hàng</a>
+            </li>
+        </div>
+
+        <li class="nav-item mt-4 pt-3 border-top" sec:authorize="hasRole('SUPPLIER')">
             <span class="px-3 text-muted small fw-bold">DÀNH CHO NCC</span>
         </li>
         <li sec:authorize="hasRole('SUPPLIER')">
@@ -39,13 +48,18 @@
                 <i class="bi bi-bell"></i> Yêu cầu báo giá
             </a>
         </li>
-        <li class="nav-item mt-4 pt-3 border-top">
-            <span class="px-3 text-muted small fw-bold">DÀNH CHO TỔNG GIÁM ĐỐC</span>
-        </li>
-        <li>
-            <a th:href="@{/ceo/dashboard}">
-                <i class="bi bi-bell"></i> DashBoard
-            </a>
-        </li>
+
+
+        <div sec:authorize="!hasRole('SUPPLIER')">
+            <li class="nav-item mt-4 pt-3 border-top">
+                <span class="px-3 text-muted small fw-bold">DÀNH CHO TỔNG GIÁM ĐỐC</span>
+            </li>
+            <li>
+                <a th:href="@{/ceo/dashboard}">
+                    <i class="bi bi-bell"></i> DashBoard
+                </a>
+            </li>
+        </div>
+
     </ul>
 </nav>

@@ -6,199 +6,252 @@
 <head>
     <meta charset="UTF-8">
     <title>Executive Strategic Analytics | CEO Control Panel</title>
-    <style>
-        body { background-color: #f8fafc !important; font-family: 'Inter', sans-serif; }
-        .ceo-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            transition: all 0.25s ease-in-out;
-        }
-        .ceo-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05); }
-        .metric-title { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; }
-        .metric-value { font-size: 1.85rem; font-weight: 700; color: #0f172a; letter-spacing: -0.02em; }
-        .growth-indicator { font-size: 0.8rem; font-weight: 600; padding: 4px 8px; border-radius: 6px; }
-        .panel-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 14px; color: #ffffff; }
-    </style>
 </head>
 <body>
-<div layout:fragment="content" class="container-fluid py-4 px-xl-4">
+<div layout:fragment="content" class="container py-4">
 
-    <div class="panel-header p-4 mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center shadow-sm">
+    <!-- Header Tiêu Chuẩn -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-light">
         <div>
-            <span class="badge bg-primary text-white mb-2 px-3 py-1.5 rounded-pill fw-semibold text-uppercase small" style="font-size: 0.65rem;">Hội Đồng Quản Trị</span>
-            <h3 class="fw-bold m-0 text-white">Hệ Thống Phân Tích Hiệu Suất Chiến Lược (CEO)</h3>
-            <p class="text-slate-400 small m-0 mt-1 text-white-50">Dữ liệu hợp nhất toàn chuỗi cung ứng và kinh doanh giày thể thao.</p>
+            <h4 class="fw-bold text-dark mb-1">
+                <i class="bi bi-shield-lock-fill text-primary me-2"></i>Bảng Điều Khiển Giám Đốc (CEO)
+            </h4>
+            <p class="text-muted small mb-0">Theo dõi dòng tiền chiến lược và giám sát hoạt động hệ thống thời gian thực.</p>
         </div>
-        <div class="mt-3 mt-md-0 d-flex gap-2">
-            <button class="btn btn-light btn-sm rounded-3 fw-semibold text-dark px-3" onclick="window.print()"><i class="bi bi-printer me-2"></i>In báo cáo</button>
-            <button class="btn btn-primary btn-sm rounded-3 fw-semibold px-3 border-secondary" style="background: #2563eb;"><i class="bi bi-calendar-range me-2"></i>Kỳ báo cáo: Năm 2026</button>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-md-6 col-xl-3">
-            <div class="card ceo-card p-4 h-100 border-0 shadow-sm">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <span class="metric-title">Doanh Thu Thuần Tích Lũy</span>
-                        <div class="metric-value mt-1" th:text="${#numbers.formatDecimal(netRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
-                    </div>
-                    <span class="growth-indicator text-success bg-success-subtle"><i class="bi bi-graph-up-arrow me-1"></i>Realtime</span>
-                </div>
-                <div class="text-muted small mt-3"><i class="bi bi-info-circle me-1"></i>Chỉ ghi nhận từ các hóa đơn đã hoàn thành.</div>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <div class="card ceo-card p-4 h-100 border-0 shadow-sm">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <span class="metric-title">Giá Trị Tài Sản Tồn Kho (Vốn Đọng)</span>
-                        <div class="metric-value mt-1 text-danger-emphasis" th:text="${#numbers.formatDecimal(deadCapital, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
-                    </div>
-                    <span class="icon text-warning fs-3"><i class="bi bi-cash-stack"></i></span>
-                </div>
-                <div class="text-muted small mt-3 text-secondary"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>Tổng giá trị vốn chôn tại các kệ hàng.</div>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <div class="card ceo-card p-4 h-100 border-0 shadow-sm">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <span class="metric-title">Tỷ Lệ Hoàn / Hủy Đơn</span>
-                        <div class="metric-value mt-1" th:text="${returnRate}">0%</div>
-                    </div>
-                    <span class="growth-indicator text-danger bg-danger-subtle"><i class="bi bi-shield-exclamation me-1"></i>Rủi ro</span>
-                </div>
-                <div class="text-muted small mt-3"><i class="bi bi-activity me-1"></i>Ngưỡng an toàn khuyến nghị của ERP là &lt; 5%.</div>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <div class="card ceo-card p-4 h-100 border-0 shadow-sm">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <span class="metric-title">Trung Tâm Phân Phối / Tổng Kho</span>
-                        <div class="metric-value mt-1" th:text="${totalBranches} + ' Trung Tâm'">1 Trung Tâm</div>
-                    </div>
-                    <span class="icon text-primary fs-3"><i class="bi bi-building-gear"></i></span>
-                </div>
-                <div class="text-muted small mt-3"><i class="bi bi-geo-alt me-1"></i>Quản lý bằng giải pháp mã QR thông minh.</div>
-            </div>
+        <div class="text-end d-none d-md-block">
+            <button class="btn btn-light btn-sm rounded-3 fw-semibold text-dark px-3 border me-2" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> In báo cáo
+            </button>
+            <span class="badge bg-light text-dark border px-3 py-2 rounded-3 fw-medium">
+                <i class="bi bi-calendar-range text-primary me-1"></i> Kỳ báo cáo: Năm 2026
+            </span>
         </div>
     </div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-lg-7">
-            <div class="card ceo-card p-4 border-0 shadow-sm">
+    <!-- ========================================== -->
+    <!-- KHỐI 1: 4 THẺ CHỈ SỐ TÀI CHÍNH TỔNG QUAN   -->
+    <!-- ========================================== -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
+        <!-- 1. Tổng Vốn Đầu Tư -->
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted fw-semibold small text-uppercase mb-1">Tổng Vốn Đầu Tư</h6>
+                        <h4 class="fw-bold text-warning m-0 mt-1"
+                            th:text="${totalInvestment != null ? (#numbers.formatDecimal(totalInvestment, 0, 'COMMA', 0, 'POINT') + ' đ') : '0 đ'}">0 đ</h4>
+                    </div>
+                    <div class="icon-shape bg-warning-subtle text-warning p-3 rounded-3">
+                        <i class="bi bi-wallet2 fs-5"></i>
+                    </div>
+                </div>
+                <div class="text-muted small mt-2">
+                    <i class="bi bi-box-seam me-1"></i>Chi phí từ các phiếu nhập hàng
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Tổng Doanh Thu -->
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted fw-semibold small text-uppercase mb-1">Tổng Doanh Thu</h6>
+                        <h4 class="fw-bold text-primary m-0 mt-1"
+                            th:text="${totalRevenue != null ? (#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT') + ' đ') : '0 đ'}">0 đ</h4>
+                    </div>
+                    <div class="icon-shape bg-primary-subtle text-primary p-3 rounded-3">
+                        <i class="bi bi-cash-stack fs-5"></i>
+                    </div>
+                </div>
+                <div class="text-muted small mt-2">
+                    <i class="bi bi-check-circle me-1"></i>Từ đơn hàng đã hoàn thành
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Tổng Lợi Nhuận -->
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted fw-semibold small text-uppercase mb-1">Tổng Lợi Nhuận</h6>
+                        <h4 class="fw-bold m-0 mt-1"
+                            th:classappend="${profitOrLoss >= 0 ? 'text-success' : 'text-danger'}"
+                            th:text="${profitOrLoss != null ? (#numbers.formatDecimal(profitOrLoss, 0, 'COMMA', 0, 'POINT') + ' đ') : '0 đ'}">0 đ</h4>
+                    </div>
+                    <div class="icon-shape p-3 rounded-3"
+                         th:classappend="${profitOrLoss >= 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}">
+                        <i class="bi bi-calculator fs-5"></i>
+                    </div>
+                </div>
+                <div class="text-muted small mt-2">
+                    <i class="bi bi-arrow-down-up me-1"></i>Doanh thu trừ vốn đầu tư
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Trạng Thái Kinh Doanh -->
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted fw-semibold small text-uppercase mb-2">Trạng Thái Kinh Doanh</h6>
+                        <span class="badge px-3 py-2 rounded-pill fw-semibold"
+                              th:classappend="${profitOrLoss >= 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}">
+                            <i class="bi me-1" th:classappend="${profitOrLoss >= 0 ? 'bi-graph-up-arrow' : 'bi-graph-down-arrow'}"></i>
+                            <span th:text="${profitOrLoss >= 0 ? 'ĐANG CÓ LÃI' : 'ĐANG THUA LỖ'}"></span>
+                        </span>
+                    </div>
+                    <div class="icon-shape p-3 rounded-3"
+                         th:classappend="${profitOrLoss >= 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}">
+                        <i class="bi fs-5" th:classappend="${profitOrLoss >= 0 ? 'bi-trophy-fill' : 'bi-exclamation-triangle-fill'}"></i>
+                    </div>
+                </div>
+                <div class="text-muted small mt-2">
+                    <i class="bi bi-activity me-1"></i>Đánh giá dòng tiền tổng thể
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- KHỐI 2: BIỂU ĐỒ DOANH THU CỘT              -->
+    <!-- ========================================== -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
                 <div class="mb-3">
-                    <h6 class="fw-bold text-dark m-0"><i class="bi bi-bezier2 me-2 text-primary"></i>Biểu Đồ Xu Hướng Doanh Thu Năm Nay</h6>
-                    <small class="text-muted">Phân tích tốc độ tăng trưởng dòng tiền (Đơn vị: Triệu VNĐ).</small>
+                    <h6 class="fw-bold text-dark mb-1">
+                        <i class="bi bi-bar-chart-line-fill text-primary me-2"></i>Biểu Đồ Doanh Thu Theo Tháng
+                    </h6>
+                    <small class="text-muted">Doanh thu ghi nhận theo từng kỳ thanh toán (Triệu VNĐ).</small>
                 </div>
-                <div style="position: relative; height:320px;">
-                    <canvas id="ceoRevenueLineChart"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-5">
-            <div class="card ceo-card p-4 border-0 shadow-sm">
-                <div class="mb-3">
-                    <h6 class="fw-bold text-dark m-0"><i class="bi bi-pie-chart me-2 text-success"></i>Cơ Cấu Doanh Thu Theo Thương Hiệu</h6>
-                    <small class="text-muted">Tỷ lệ đóng góp phần trăm (%) doanh số của các nhãn hàng giày.</small>
-                </div>
-                <div style="position: relative; height:320px;">
-                    <canvas id="ceoBrandHorizontalBarChart"></canvas>
+                <div style="position: relative; height:360px;">
+                    <canvas id="ceoRevenueBarChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- KHỐI 3: LỊCH SỬ THAO TÁC NHÂN VIÊN         -->
+    <!-- ========================================== -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold m-0 text-dark">
+                            <i class="bi bi-clock-history text-info me-2"></i>Lịch Sử Thao Tác Hệ Thống (Gần Đây)
+                        </h6>
+                        <small class="text-muted">Giám sát nhật ký hoạt động thực tế của nhân viên toàn hệ thống.</small>
+                    </div>
+                    <span class="badge bg-light text-dark border px-3 py-2 rounded-3 small">
+                        <i class="bi bi-shield-check text-success me-1"></i>Ghi nhận tự động
+                    </span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-secondary small text-uppercase">
+                        <tr>
+                            <th class="ps-4 py-3">Thời Gian</th>
+                            <th class="py-3">Nhân Viên</th>
+                            <th class="py-3">Vai Trò</th>
+                            <th class="py-3">Hành Động</th>
+                            <th class="py-3">Chi Tiết & Mô Tả</th>
+                            <th class="pe-4 py-3 text-end">Địa Chỉ IP</th>
+                        </tr>
+                        </thead>
+                        <tbody class="small">
+                        <tr th:each="log : ${recentActivities}" class="border-bottom border-light">
+                            <td class="ps-4 py-3 text-muted" th:text="${#temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm:ss')}">01/01/2026 00:00</td>
+                            <td class="fw-semibold text-dark py-3" th:text="${log.fullName}"></td>
+                            <td class="py-3">
+                                <span class="badge bg-secondary-subtle text-secondary border px-2 py-1" th:text="${log.roleName}"></span>
+                            </td>
+                            <td class="py-3">
+                                <span class="badge px-2 py-1"
+                                      th:classappend="${log.actionName != null and (log.actionName.contains('XÓA') or log.actionName.contains('THẤT BẠI')) ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary'}"
+                                      th:text="${log.actionName}"></span>
+                            </td>
+                            <td class="py-3 text-truncate" style="max-width: 320px;" th:title="${log.description}" th:text="${log.description}"></td>
+                            <td class="pe-4 py-3 text-end font-monospace text-muted" th:text="${log.ipAddress}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(recentActivities)}">
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox text-secondary fs-1 d-block mb-2"></i>
+                                <h6 class="fw-bold mb-0 text-dark">Chưa có dữ liệu ghi nhận hoạt động nào gần đây.</h6>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Chart.js đồng bộ style màu biểu đồ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script th:inline="javascript">
         document.addEventListener("DOMContentLoaded", function () {
-            console.log("=== ĐANG KHỞI TẠO BIỂU ĐỒ CEO DASHBOARD ===");
-
-            // 1. Cấu hình Biểu đồ đường Doanh thu
             const trendLabels = /*[[${trendLabels}]]*/ [];
             const trendData = /*[[${trendData}]]*/ [];
 
-            console.log("Dữ liệu biểu đồ đường xu hướng:", { labels: trendLabels, data: trendData });
-
             if (trendLabels && trendLabels.length > 0) {
-                const ctxLine = document.getElementById('ceoRevenueLineChart').getContext('2d');
+                const ctxBar = document.getElementById('ceoRevenueBarChart').getContext('2d');
 
-                // Đổ màu Gradient bóng mờ phía dưới đường line
-                const gradient = ctxLine.createLinearGradient(0, 0, 0, 300);
-                gradient.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
-                gradient.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
-
-                new Chart(ctxLine, {
-                    type: 'line',
+                new Chart(ctxBar, {
+                    type: 'bar',
                     data: {
                         labels: trendLabels,
                         datasets: [{
-                            label: 'Doanh thu thực tế (Triệu đ)',
+                            label: 'Doanh thu (Triệu VNĐ)',
                             data: trendData,
-                            borderColor: '#2563eb',
-                            borderWidth: 3,
-                            pointBackgroundColor: '#2563eb',
-                            pointHoverRadius: 6,
-                            fill: true,
-                            backgroundColor: gradient,
-                            tension: 0.3
+                            backgroundColor: 'rgba(79, 70, 229, 0.85)',
+                            borderColor: 'rgb(79, 70, 229)',
+                            borderWidth: 1.5,
+                            borderRadius: 6,
+                            barThickness: 32
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: { grid: { display: false }, ticks: { color: '#64748b' } },
-                            y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }
-                        }
-                    }
-                });
-            } else {
-                console.warn("Cảnh báo: Không thể vẽ biểu đồ đường vì danh sách dữ liệu rỗng (kiểm tra Database xem có đơn hàng thành công nào trong năm nay chưa).");
-            }
-
-            // 2. Cấu hình Biểu đồ thanh ngang Thị phần hãng giày
-            const brandLabels = /*[[${brandLabels}]]*/ [];
-            const brandData = /*[[${brandData}]]*/ [];
-
-            console.log("Dữ liệu biểu đồ thị phần nhãn hàng:", { labels: brandLabels, data: brandData });
-
-            if (brandLabels && brandLabels.length > 0) {
-                const ctxHorizontal = document.getElementById('ceoBrandHorizontalBarChart').getContext('2d');
-                new Chart(ctxHorizontal, {
-                    type: 'bar',
-                    options: {
-                        indexAxis: 'y', // Biến đổi cột đứng thành cột ngang
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                padding: 12,
+                                bodyFont: { size: 13 },
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Doanh thu: ' + context.raw + ' Triệu VNĐ';
+                                    }
+                                }
+                            }
+                        },
                         scales: {
                             x: {
-                                max: 100,
-                                ticks: { callback: value => value + '%', color: '#64748b' },
-                                grid: { color: '#f1f5f9' }
+                                grid: { display: false },
+                                ticks: { color: '#64748b', font: { size: 12 } }
                             },
-                            y: { grid: { display: false }, ticks: { color: '#64748b' } }
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#f1f5f9' },
+                                ticks: {
+                                    color: '#64748b',
+                                    font: { size: 12 },
+                                    callback: function(value) {
+                                        return value + ' Tr';
+                                    }
+                                }
+                            }
                         }
-                    },
-                    data: {
-                        labels: brandLabels,
-                        datasets: [{
-                            data: brandData,
-                            backgroundColor: '#0f172a',
-                            borderRadius: 6,
-                            barThickness: 16
-                        }]
                     }
                 });
-            } else {
-                console.warn("Cảnh báo: Không thể vẽ biểu đồ ngang vì chưa có dữ liệu bán hàng theo thương hiệu tương ứng.");
             }
         });
     </script>
-</div> </body>
+</div>
+</body>
 </html>

@@ -6,11 +6,14 @@ import com.example.LVTN.entity.ImportReceipt;
 import com.example.LVTN.entity.ImportReceiptDetail;
 import com.example.LVTN.entity.ProcurementRequest;
 import com.example.LVTN.entity.ProductSize;
+import com.example.LVTN.entity.User;
 import com.example.LVTN.repository.ImportReceiptDetailRepository;
 import com.example.LVTN.repository.ImportReceiptRepository;
 import com.example.LVTN.repository.ProcurementRequestRepository;
 import com.example.LVTN.repository.ProductSizeRepository;
+import com.example.LVTN.service.ActivityLogService;
 import com.example.LVTN.service.ImportReceiptService;
+import com.example.LVTN.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,53 +37,77 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
     @Autowired
     private ProcurementRequestRepository procurementRequestRepository;
 
+    @Autowired
+    private ActivityLogService activityLogService;
+
+    @Autowired
+    private SecurityUtils securityUtils; // Inject SecurityUtils vào đây
+
     // BƯỚC 1: XỬ LÝ LƯU NHÁP PHIẾU TỪ FILE CSV
     @Override
     public void saveDraftReceipt(ImportReceipt receipt) {
         BigDecimal total = BigDecimal.ZERO;
 
-        // Lưu phiếu nhập trước để lấy ID sinh tự động cho các detail liên kết
         importReceiptRepository.save(receipt);
 
         if (receipt.getDetails() != null) {
             for (ImportReceiptDetail detail : receipt.getDetails()) {
-                // Tính toán tổng tiền nháp ban đầu
                 BigDecimal subtotal = detail.getImportPrice().multiply(new BigDecimal(detail.getQuantity()));
                 total = total.add(subtotal);
-
                 importReceiptDetailRepository.save(detail);
             }
         }
 
         receipt.setTotalAmount(total);
         importReceiptRepository.save(receipt);
+
+        User currentUser = securityUtils.getCurrentLoggedInUser();
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        String fullName = (currentUser != null && currentUser.getFullName() != null) ? currentUser.getFullName() : "Hệ thống / NCC";
+        String roleName = securityUtils.getCurrentRoleName();
+
+        activityLogService.log(
+                userId,
+                fullName,
+                roleName,
+                "NỘP BÁO GIÁ NHẬP HÀNG",
+                fullName + " đã tiếp nhận/tạo phiếu báo giá nháp #" + receipt.getId() + " - Dự kiến tổng tiền: " + total + " VNĐ"
+        );
     }
 
-    // BƯỚC 2: ADMIN DUYỆT VÀ TỰ DO HẠ SỐ LƯỢNG (CHẶN KHÔNG CHO PHÉP TĂNG VƯỢT CSV)
+    // BƯỚC 2: ADMIN DUYỆT VÀ CHÍNH THỨC XÁC THỰC SỐ LƯỢNG MUA
     @Override
     public void adminApproveReceipt(Long id, List<ImportDetailUpdateDTO> decisions) {
-        // 1. Lấy phiếu từ DB
         ImportReceipt receipt = importReceiptRepository.findById(id).orElseThrow();
 
-        // 2. Lặp qua danh sách quyết định của Admin
         for (ImportDetailUpdateDTO decision : decisions) {
             ImportReceiptDetail detail = importReceiptDetailRepository.findById(decision.getDetailId()).orElse(null);
 
             if (detail != null) {
-                // Gán dữ liệu
                 detail.setApprovedQuantity(decision.getApprovedQty());
-                detail.setIsApproved(true); // Quan trọng: Phải set true thì Thủ kho mới thấy
-
-                // LƯU TRỰC TIẾP CÁI CHI TIẾT NÀY VÀO DB
+                detail.setIsApproved(true);
                 importReceiptDetailRepository.save(detail);
             }
         }
 
-        // 3. Cập nhật trạng thái phiếu
         receipt.setStatus("APPROVED");
         importReceiptRepository.save(receipt);
+
+        User currentUser = securityUtils.getCurrentLoggedInUser();
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        String fullName = (currentUser != null && currentUser.getFullName() != null) ? currentUser.getFullName() : "Admin";
+        String roleName = securityUtils.getCurrentRoleName();
+
+        activityLogService.log(
+                userId,
+                fullName,
+                roleName,
+                "XÁC THỰC DUYỆT PHIẾU NHẬP",
+                fullName + " đã phê duyệt số lượng và chấp thuận phiếu nhập hàng #" + receipt.getId() + " - Chờ thủ kho kiểm nhận."
+        );
     }
-    // BƯỚC 3: THỦ KHO KIỂM ĐẾM THỰC TẾ (BỔ SUNG LOGIC CHẶN SAI LỆCH TOÁN HỌC)
+
+    // BƯỚC 3: THỦ KHO KIỂM ĐẾM THỰC TẾ VÀ ĐƯA VÀO KHO (ĐÃ FIX LƯU LOG CHUẨN XÁC)
     @Override
     public void warehouseConfirmAndImportStock(Long id, List<WarehouseCheckDTO> checkResults) {
         ImportReceipt receipt = importReceiptRepository.findById(id)
@@ -92,8 +119,6 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
             ImportReceiptDetail detail = importReceiptDetailRepository.findById(result.getDetailId()).orElse(null);
 
             if (detail != null && Boolean.TRUE.equals(detail.getIsApproved())) {
-
-                // ================= CHẶN LOGIC BẢO MẬT Ở BACKEND =================
                 int totalCountByWarehouse = result.getActualQty() + result.getDamagedQty();
                 if (totalCountByWarehouse != detail.getApprovedQuantity()) {
                     throw new RuntimeException("Lỗi nhập liệu sản phẩm '"
@@ -102,21 +127,17 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
                             + ") và số lượng lỗi (" + result.getDamagedQty()
                             + ") phải bằng đúng số lượng sếp duyệt (" + detail.getApprovedQuantity() + " đôi)!");
                 }
-                // ================================================================
 
-                // Nếu hợp lệ, tiến hành lưu vào DB
                 detail.setActualQuantity(result.getActualQty());
                 detail.setDamagedQuantity(result.getDamagedQty());
-                detail.setQuantity(result.getActualQty()); // Chỉ cộng số lượng hàng TỐT vào kho
+                detail.setQuantity(result.getActualQty());
 
-                // Thực hiện cộng dồn số hàng tốt vào tồn kho
                 ProductSize ps = productSizeRepository.findById(detail.getProductSize().getId()).orElse(null);
                 if (ps != null) {
                     ps.setQuantity(ps.getQuantity() + result.getActualQty());
                     productSizeRepository.save(ps);
                 }
 
-                // Tính tổng tiền hóa đơn thực tế cuối cùng dựa trên số hàng tốt nhận được
                 BigDecimal subtotal = detail.getImportPrice().multiply(new BigDecimal(result.getActualQty()));
                 finalTotalAmount = finalTotalAmount.add(subtotal);
 
@@ -127,6 +148,20 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
         receipt.setTotalAmount(finalTotalAmount);
         receipt.setStatus("COMPLETED");
         importReceiptRepository.save(receipt);
+
+        // ================= LOGGING DÀNH RIÊNG CHO THỦ KHO =================
+        User currentUser = securityUtils.getCurrentLoggedInUser();
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        String fullName = (currentUser != null && currentUser.getFullName() != null) ? currentUser.getFullName() : "Thủ kho";
+        String roleName = securityUtils.getCurrentRoleName();
+
+        activityLogService.log(
+                userId,
+                fullName,
+                roleName,
+                "HOÀN TẤT KIỂM NHẬN KHO",
+                fullName + " đã thực tế kiểm nhận & nhập kho thành công cho phiếu #" + receipt.getId() + " - Giá trị nhập: " + finalTotalAmount + " VNĐ"
+        );
     }
 
     @Override
@@ -142,41 +177,48 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
     @Override
     @Transactional
     public void selectWinningBid(Long procurementRequestId, Long winningReceiptId) {
-        // 1. Lấy tất cả các bảng báo giá nộp cho đợt gọi hàng này
         List<ImportReceipt> allBids = importReceiptRepository.findByProcurementRequestId(procurementRequestId);
 
         for (ImportReceipt bid : allBids) {
             if (bid.getId().equals(winningReceiptId)) {
-                // Phiếu được Admin chọn -> Chuyển trạng thái để Thủ kho thấy
                 bid.setStatus("APPROVED");
             } else {
-                // Các phiếu của nhà cung cấp khác bị loại
                 bid.setStatus("REJECTED");
             }
             importReceiptRepository.save(bid);
         }
 
-        // 2. Đóng đợt gọi hàng lại, không nhận thêm báo giá nữa
         ProcurementRequest request = procurementRequestRepository.findById(procurementRequestId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt gọi hàng"));
         request.setStatus("CLOSED");
         procurementRequestRepository.save(request);
+
+        User currentUser = securityUtils.getCurrentLoggedInUser();
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        String fullName = (currentUser != null && currentUser.getFullName() != null) ? currentUser.getFullName() : "Admin / CEO";
+        String roleName = securityUtils.getCurrentRoleName();
+
+        activityLogService.log(
+                userId,
+                fullName,
+                roleName,
+                "CHỌN BÁO GIÁ TRÚNG THẦU",
+                fullName + " đã phê duyệt phiếu báo giá #" + winningReceiptId + " trúng thầu cho Đợt gọi hàng #" + procurementRequestId
+        );
     }
+
     @Override
     @Transactional
     public ImportReceipt save(ImportReceipt receipt) {
-        // Tự động tính toán tổng tiền lô hàng dựa trên số lượng và giá thực tế trước khi lưu
         if (receipt.getDetails() != null) {
             BigDecimal total = BigDecimal.ZERO;
             for (ImportReceiptDetail detail : receipt.getDetails()) {
-                // Nếu trạng thái hoàn tất (COMPLETED), tính theo số lượng thực nhận (actualQuantity)
                 if ("COMPLETED".equals(receipt.getStatus())) {
                     if (detail.getActualQuantity() != null && detail.getImportPrice() != null) {
                         BigDecimal itemTotal = detail.getImportPrice().multiply(new BigDecimal(detail.getActualQuantity()));
                         total = total.add(itemTotal);
                     }
                 } else {
-                    // Nếu đang ở bước duyệt, tính tạm thời theo số lượng duyệt mua (approvedQuantity)
                     if (detail.getApprovedQuantity() != null && detail.getImportPrice() != null) {
                         BigDecimal itemTotal = detail.getImportPrice().multiply(new BigDecimal(detail.getApprovedQuantity()));
                         total = total.add(itemTotal);
@@ -186,7 +228,6 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
             receipt.setTotalAmount(total);
         }
 
-        // Gọi xuống Repository để lưu chính thức xuống Database
         return importReceiptRepository.save(receipt);
     }
 }

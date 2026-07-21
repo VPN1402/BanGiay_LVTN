@@ -1,7 +1,9 @@
 package com.example.LVTN.controller.admin;
 
+import com.example.LVTN.entity.ActivityLog;
+import com.example.LVTN.repository.ActivityLogRepository;
+import com.example.LVTN.repository.ImportReceiptRepository;
 import com.example.LVTN.repository.OrderRepository;
-import com.example.LVTN.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,53 +22,50 @@ public class CeoDashboardController {
     private OrderRepository orderRepository;
 
     @Autowired
-    private ProductRepository productRepository;
+    private ImportReceiptRepository importReceiptRepository;
+
+    @Autowired
+    private ActivityLogRepository activityLogRepository;
 
     @GetMapping("/dashboard")
     public String showCeoDashboard(Model model) {
 
-        // 1. Lấy các chỉ số tài chính vĩ mô từ Database
+        // 1. Tính Tổng Vốn Đầu Tư (Tổng tiền nhập hàng)
+        BigDecimal totalInvestment = importReceiptRepository.calculateTotalExpense();
+        if (totalInvestment == null) totalInvestment = BigDecimal.ZERO;
+
+        // 2. Lấy Doanh Thu Thuần
         BigDecimal netRevenue = orderRepository.calculateNetRevenue();
-        BigDecimal deadCapital = productRepository.calculateDeadCapital();
+        if (netRevenue == null) netRevenue = BigDecimal.ZERO;
 
-        Long totalOrders = orderRepository.countTotalOrders();
-        Long cancelledOrders = orderRepository.countCancelledOrders();
+        // 3. Tính Lời / Lỗ
+        BigDecimal profitOrLoss = netRevenue.subtract(totalInvestment);
 
-        // Tính toán tỷ lệ hủy đơn an toàn
-        double returnRate = 0.0;
-        if (totalOrders != null && totalOrders > 0 && cancelledOrders != null) {
-            returnRate = ((double) cancelledOrders / totalOrders) * 100;
-        }
+        // 4. Lấy 20 lịch sử thao tác gần nhất
+        List<ActivityLog> recentActivities = activityLogRepository.findTop20ByOrderByCreatedAtDesc();
 
-        // Đẩy số liệu ra giao diện (Bảo vệ trường hợp DB trống bằng cách check null)
-        model.addAttribute("netRevenue", netRevenue != null ? netRevenue : BigDecimal.ZERO);
-        model.addAttribute("deadCapital", deadCapital != null ? deadCapital : BigDecimal.ZERO);
-        model.addAttribute("returnRate", String.format("%.1f%%", returnRate));
-        model.addAttribute("totalBranches", 1); // Giả lập hệ thống có 1 trung tâm tổng kho lớn nhất
+        // Truyền dữ liệu ra View HTML
+        model.addAttribute("totalInvestment", totalInvestment);
+        model.addAttribute("totalRevenue", netRevenue);
+        model.addAttribute("profitOrLoss", profitOrLoss);
+        model.addAttribute("recentActivities", recentActivities);
 
-        // 2. Xử lý dữ liệu Biểu đồ đường (Doanh thu xu hướng các tháng)
+        // 5. Xử lý dữ liệu Biểu đồ Cột (Doanh thu theo tháng)
         List<Object[]> rawTrendData = orderRepository.getMonthlyRevenueTrend();
         List<String> trendLabels = new ArrayList<>();
         List<Double> trendData = new ArrayList<>();
 
-        for (Object[] row : rawTrendData) {
-            trendLabels.add(row[0].toString()); // Ví dụ: "Tháng 01"
-            trendData.add(((Number) row[1]).doubleValue()); // Số tiền (triệu đồng)
+        if (rawTrendData != null) {
+            for (Object[] row : rawTrendData) {
+                if (row != null && row.length >= 2) {
+                    trendLabels.add(row[0] != null ? row[0].toString() : "");
+                    trendData.add(row[1] != null ? ((Number) row[1]).doubleValue() : 0.0);
+                }
+            }
         }
+
         model.addAttribute("trendLabels", trendLabels);
         model.addAttribute("trendData", trendData);
-
-        // 3. Xử lý dữ liệu Biểu đồ ngang (Thị phần doanh số theo hãng giày)
-        List<Object[]> rawBrandData = productRepository.getRevenuePercentageByBrand();
-        List<String> brandLabels = new ArrayList<>();
-        List<Double> brandData = new ArrayList<>();
-
-        for (Object[] row : rawBrandData) {
-            brandLabels.add(row[0].toString()); // Ví dụ: "Nike"
-            brandData.add(((Number) row[1]).doubleValue()); // Tỷ lệ %
-        }
-        model.addAttribute("brandLabels", brandLabels);
-        model.addAttribute("brandData", brandData);
 
         return "admin/ceo/dashboard";
     }

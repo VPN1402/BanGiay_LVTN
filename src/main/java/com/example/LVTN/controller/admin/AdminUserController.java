@@ -36,12 +36,38 @@ public class AdminUserController {
     }
 
     @PostMapping("/user/save")
-    public String saveUser(@ModelAttribute("user") User user) {
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            String encodedPassword = passwordEncoder.encode(user.getPassword());
-            user.setPassword(encodedPassword);
+    public String saveUser(@ModelAttribute("user") User formUser) {
+        if (formUser.getId() != null && formUser.getId() > 0) {
+
+            User existingUser = userService.findById(formUser.getId());
+            if (existingUser != null) {
+
+                existingUser.setFullName(formUser.getFullName());
+                existingUser.setEmail(formUser.getEmail());
+                existingUser.setPhone(formUser.getPhone());
+                existingUser.setStatus(formUser.getStatus());
+                existingUser.setRole(formUser.getRole());
+
+
+                String roleName = existingUser.getRole() != null ? existingUser.getRole().getRoleName().toLowerCase() : "";
+                boolean isStaff = roleName.contains("nhân viên") || roleName.contains("thủ kho") || roleName.contains("cửa hàng trưởng");
+
+                if (isStaff && formUser.getPassword() != null && !formUser.getPassword().trim().isEmpty()) {
+                    existingUser.setPassword(passwordEncoder.encode(formUser.getPassword()));
+                }
+
+
+
+                userService.save(existingUser);
+            }
+        } else {
+
+            if (formUser.getPassword() != null && !formUser.getPassword().isEmpty()) {
+                formUser.setPassword(passwordEncoder.encode(formUser.getPassword()));
+            }
+            userService.save(formUser);
         }
-        userService.save(user);
+
         return "redirect:/admin/users";
     }
 
