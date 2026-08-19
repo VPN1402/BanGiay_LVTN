@@ -61,7 +61,12 @@ public class EmailServiceImpl implements EmailService {
                 }
             }
 
-            // 3. Tiến hành ráp toàn bộ thông tin vào mẫu Email HTML doanh nghiệp
+
+            java.math.BigDecimal shippingFee = new java.math.BigDecimal("30000");
+
+
+            java.math.BigDecimal finalTotal = order.getTotalAmount().add(shippingFee);
+
             String htmlContent = "<div style='font-family: Arial, sans-serif; max-width: 650px; margin: auto; padding: 25px; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);'>"
                     + "<div style='text-align: center; margin-bottom: 20px;'>"
                     + "  <h2 style='color: #2c3e50; margin-bottom: 5px;'>CẢM ƠN BẠN ĐÃ ĐẶT HÀNG!</h2>"
@@ -92,16 +97,21 @@ public class EmailServiceImpl implements EmailService {
                     + "</table>"
 
                     // Tổng tiền cuối cùng
-                    + "<div style='text-align: right; margin-top: 15px; font-size: 16px;'>"
-                    + "  <b>Tổng cộng tiền thanh toán: </b>"
-                    + "  <span style='color: #dc3545; font-weight: bold; font-size: 20px;'>" + currencyFormatter.format(order.getTotalAmount()) + "</span>"
-                    + "</div>"
-
-                    + "<div style='background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 6px; font-size: 13px; margin-top: 20px;'>"
-                    + "  ⚠️ <b>Lưu ý:</b> Vui lòng giữ điện thoại luôn liên lạc được để nhân viên giao hàng liên hệ bàn giao sản phẩm."
-                    + "</div>"
-                    + "<hr style='border: none; border-top: 1px solid #eee; margin: 25px 0;'>"
-                    + "<p style='font-size: 12px; color: #999; text-align: center; margin-bottom: 0;'>Đây là email tự động từ hệ thống quản lý LVTN, vui lòng không trả lời trực tiếp thư này.</p>"
+                    + "<div style='text-align: right; margin-top: 15px; font-size: 15px;'>"
+                    + "  <div style='margin-bottom: 8px;'>"
+                    + "    <span style='color: #666;'>Tạm tính tiền hàng: </span>"
+                    + "    <span style='font-weight: bold;'>" + currencyFormatter.format(order.getTotalAmount()) + "</span>"
+                    + "  </div>"
+                    + "  <div style='margin-bottom: 8px;'>"
+                    + "    <span style='color: #666;'>Phí vận chuyển: </span>"
+                    + "    <span style='font-weight: bold;'>30.000 ₫</span>"
+                    + "  </div>"
+                    + "  <div style='border-top: 1px solid #eee; padding-top: 10px;'>"
+                    + "    <b>Tổng cộng tiền thanh toán: </b>"
+                    + "    <span style='color: #dc3545; font-weight: bold; font-size: 20px;'>"
+                    + currencyFormatter.format(finalTotal)
+                    + "    </span>"
+                    + "  </div>"
                     + "</div>";
 
             helper.setText(htmlContent, true);

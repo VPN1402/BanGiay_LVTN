@@ -26,6 +26,7 @@ public class User {
 
     private Integer status = 1;
 
+    private String address;
 
     @ManyToOne
     @JoinColumn(name = "role_id")

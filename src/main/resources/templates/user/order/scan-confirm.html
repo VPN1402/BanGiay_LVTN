@@ -54,9 +54,27 @@
                 </div>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-2">
-                <span class="fw-bold text-dark small">Tổng tiền đơn hàng:</span>
-                <span class="fw-bold text-danger fs-5" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA')} + 'đ'">0đ</span>
+            <div class="pt-3 border-top mt-2">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small">Tạm tính:</span>
+                    <span class="text-dark small"
+                          th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA')} + 'đ'">
+            0đ
+        </span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small">Phí vận chuyển:</span>
+                    <span class="text-dark small">30.000đ</span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark small">Tổng tiền đơn hàng:</span>
+                    <span class="fw-bold text-danger fs-5"
+                          th:text="${#numbers.formatDecimal(order.totalAmount + 30000, 0, 'POINT', 0, 'COMMA')} + 'đ'">
+            0đ
+        </span>
+                </div>
             </div>
         </div>
 

@@ -37,9 +37,15 @@
                             <span class="fw-bold" th:text="'Mã đơn: #' + ${order.id}">Mã đơn</span>
                             <span class="text-muted small ms-2" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
                         </div>
-                        <span class="badge"
-                              th:classappend="${order.paymentStatus == 'PAID' ? 'bg-success' : 'bg-danger'}"
-                              th:text="${order.paymentStatus == 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}"></span>
+                        <!-- Trạng thái thanh toán -->
+
+                        <span class="badge bg-secondary" th:if="${order.paymentStatus == 'UNPAID'}">Chưa thanh toán</span>
+
+                        <span class="badge bg-success" th:if="${order.paymentStatus == 'PAID'}">Đã thanh toán</span>
+
+                        <span class="badge bg-warning text-dark" th:if="${order.paymentStatus == 'REFUND_PENDING'}">Đang chờ hoàn tiền</span>
+
+                        <span class="badge bg-info text-dark" th:if="${order.paymentStatus == 'REFUNDED'}">Đã hoàn tiền</span>
 
                         <span class="badge bg-primary" th:text="${order.orderStatus}">Trạng thái</span>
                     </div>
@@ -49,7 +55,7 @@
                         <div>
                             <h6 class="mb-1" th:text="${item.product.name}"></h6>
                             <div class="text-muted small" th:text="'Size: ' + ${item.size} + ' | Số lượng: ' + ${item.quantity}"></div>
-                            <div class="text-primary fw-bold" th:text="${#numbers.formatDecimal(item.price, 1, 'POINT', 0, 'COMMA')} + 'đ'"></div>
+                            <div class="text-primary fw-bold" th:text="${#numbers.formatDecimal(item.price+30000, 1, 'POINT', 0, 'COMMA')} + 'đ'"></div>
                         </div>
                     </div>
 

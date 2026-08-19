@@ -76,7 +76,6 @@ public class OrderServiceImpl implements OrderService {
             }
 
             // CHÚ Ý: ĐÃ XÓA ĐOẠN TRỪ KHO TẠI ĐÂY THEO NGHIỆP VỤ CHỜ SUBMIT KHO MỚI TRỪ
-
             // Chuyển CartItem thành OrderItem
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);

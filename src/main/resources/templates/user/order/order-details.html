@@ -21,9 +21,7 @@
             </a>
         </div>
 
-        <!-- ========================================================================================= -->
-        <!-- THANH TIẾN TRÌNH GIAO HÀNG (STEPPER TIMELINE TOÁN DIỆN) -->
-        <!-- ========================================================================================= -->
+
 
         <!-- Trường hợp 1: Đơn hàng hoạt động bình thường -->
         <div class="card p-4 shadow-sm border-0 rounded-3 mb-4" th:if="${order.orderStatus != 'CANCELLED'}">
@@ -107,19 +105,52 @@
             <!-- Cột trái: Thông tin nhận hàng -->
             <div class="col-md-4">
                 <div class="card border-0 p-4 shadow-sm rounded-3 h-100">
-                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
-                        <i class="bi bi-geo-alt text-secondary me-1"></i> Địa chỉ nhận hàng
-                    </h6>
-                    <div class="small text-secondary">
-                        <p class="mb-2"><strong class="text-dark" th:text="${order.receiverName}"></strong></p>
-                        <p class="mb-2" th:text="${order.receiverPhone}"></p>
-                        <p class="mb-3" th:text="${order.shippingAddress}"></p>
-                    </div>
 
-                    <div class="mt-auto bg-light p-3 rounded-3 border-0" th:if="${order.note != null && !order.note.isEmpty()}">
-                        <span class="d-block small fw-semibold text-dark mb-1">Ghi chú từ bạn:</span>
-                        <p class="text-muted small mb-0 font-italic" th:text="${order.note}"></p>
-                    </div>
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                        <i class="bi bi-person-vcard me-1"></i>
+                        Thông tin nhận hàng
+                    </h6>
+
+                    <table class="table table-borderless table-sm mb-0">
+                        <tbody>
+                        <tr>
+                            <td class="text-muted" style="width:110px;">
+                                <i class="bi bi-person"></i> Người nhận
+                            </td>
+                            <td class="fw-semibold text-dark"
+                                th:text="${order.receiverName}">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">
+                                <i class="bi bi-telephone"></i> Số điện thoại
+                            </td>
+                            <td class="fw-semibold"
+                                th:text="${order.receiverPhone}">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">
+                                <i class="bi bi-geo-alt"></i> Địa chỉ
+                            </td>
+                            <td th:text="${order.shippingAddress}">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted align-top">
+                                <i class="bi bi-chat-left-text"></i> Ghi chú
+                            </td>
+                            <td th:if="${order.note != null && !order.note.isBlank()}"
+                                th:text="${order.note}">
+                            </td>
+                            <td class="text-muted fst-italic"
+                                th:if="${order.note == null || order.note.isBlank()}">
+                                Không có ghi chú
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
                 </div>
             </div>
 
@@ -135,33 +166,51 @@
                             <thead class="table-light small text-secondary border-0">
                             <tr>
                                 <th class="border-0">Tên sản phẩm</th>
-                                <th class="text-center border-0" style="width: 100px;">Số lượng</th>
-                                <th class="text-end border-0" style="width: 150px;">Đơn giá</th>
+                                <th class="text-center border-0" style="width:100px;">Số lượng</th>
+                                <th class="text-end border-0" style="width:150px;">Đơn giá</th>
+                                <th class="text-end border-0" style="width:150px;">Thành tiền</th>
                             </tr>
                             </thead>
+
                             <tbody>
-                            <tr th:each="item : ${order.orderItems}">
-                                <td class="py-3">
-                                    <span class="fw-semibold text-dark" th:text="${item.product.name}"></span>
-                                </td>
+                            <tr th:each="item : ${order.orderItems}"><td class="py-3">
+                            <span class="fw-semibold text-dark" th:text="${item.product.name}"></span></td>
+
                                 <td class="text-center py-3 text-secondary" th:text="'x' + ${item.quantity}"></td>
-                                <td class="text-end py-3 fw-semibold text-dark" th:text="${#numbers.formatDecimal(item.price, 0, 'POINT', 0, 'COMMA')} + 'đ'"></td>
+                                <td class="text-end py-3 fw-semibold text-dark" th:text="${#numbers.formatDecimal(item.price,0,'POINT',0,'COMMA')} + 'đ'"></td>
+                                <td class="text-end py-3 fw-semibold text-dark" th:text="${#numbers.formatDecimal(item.price * item.quantity,0,'POINT',0,'COMMA')} + 'đ'"></td>
                             </tr>
                             </tbody>
                         </table>
                     </div>
 
                     <!-- Phần tổng thanh toán -->
-                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-                        <div class="small text-muted">
-                            Hình thức:
-                            <span class="badge bg-secondary-subtle text-secondary px-2 py-1 ms-1 rounded-1 text-uppercase" th:text="${order.paymentMethod}"></span>
-                        </div>
-                        <div class="text-end">
-                            <span class="text-muted small me-2">Thành tiền:</span>
-                            <span class="fs-4 fw-bold text-danger" th:text="${#numbers.formatDecimal(order.finalTotal, 0, 'POINT', 0, 'COMMA')} + 'đ'"></span>
+                    <hr class="mt-4">
+                    <div class="row justify-content-end">
+                        <div class="col-md-6">
+
+                            <div class="d-flex justify-content-between mb-2"><span class="text-secondary">Tạm tính</span>
+                                <span class="fw-semibold" th:text="${#numbers.formatDecimal(order.totalAmount,0,'POINT',0,'COMMA')} + 'đ'"></span>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-2"><span class="text-secondary">Phí vận chuyển</span>
+                                <span class="fw-semibold">30.000đ</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-3"><span class="text-secondary">Hình thức thanh toán</span>
+                                <span class="badge bg-secondary" th:text="${order.paymentMethod}"></span>
+                            </div>
+
+                            <hr>
+
+                            <div class="d-flex justify-content-between align-items-center"><h5 class="fw-bold mb-0">Tổng thanh toán</h5>
+                                <h4 class="text-danger fw-bold mb-0"
+                                    th:text="${#numbers.formatDecimal(order.finalTotal,0,'POINT',0,'COMMA')} + 'đ'">
+                                </h4>
+                            </div>
                         </div>
                     </div>
+
 
                 </div>
             </div>

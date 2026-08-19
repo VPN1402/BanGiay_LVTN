@@ -86,12 +86,12 @@
                     </div>
                     <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
                         <span class="text-muted">Phí giao hàng:</span>
-                        <span>Miễn phí</span>
+                        <span>30.000 đ</span>
                     </div>
 
                     <div class="d-flex justify-content-between mb-4">
                         <span class="fw-bold">Tổng cộng:</span>
-                        <span class="fw-bold text-primary-custom fs-5" th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">7.700.000đ</span>
+                        <span class="fw-bold text-primary-custom fs-5" th:text="${#numbers.formatDecimal(totalPrice+30000, 0, 'COMMA', 0, 'POINT')} + 'đ'">7.700.000đ</span>
                     </div>
 
 <!--                    <div class="mb-4">-->
@@ -102,7 +102,10 @@
 <!--                        </div>-->
 <!--                    </div>-->
 
-                    <a th:href="@{/checkout}" class="btn btn-primary-custom w-100 btn-lg text-center d-block">Tiến Hành Thanh Toán</a>
+                    <a th:href="@{/checkout}"
+                       class="btn btn-dark w-100 btn-lg text-center d-block fw-bold">
+                        Tiến Hành Thanh Toán
+                    </a>
                 </div>
             </div>
         </div>

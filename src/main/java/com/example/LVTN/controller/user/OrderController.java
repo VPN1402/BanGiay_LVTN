@@ -34,20 +34,32 @@ public class OrderController {
 
     @GetMapping("/checkout")
     public String showCheckoutPage(Model model, Principal principal) {
+
         if (principal == null) {
             return "redirect:/login";
         }
 
-        // lấy tt giỏ
+        // Lấy giỏ hàng
         model.addAttribute("cartItems", cartService.getCartForUser().getItems());
         model.addAttribute("totalPrice", cartService.getTotalPrice());
 
-        model.addAttribute("checkoutRequest", new CheckoutRequest());
+        // Lấy thông tin người dùng
+        User user = userService.findByEmail(principal.getName());
+
+        CheckoutRequest checkoutRequest = new CheckoutRequest();
+
+        if (user != null) {
+            checkoutRequest.setReceiverName(user.getFullName());
+            checkoutRequest.setReceiverPhone(user.getPhone());
+            checkoutRequest.setShippingAddress(user.getAddress());
+        }
+
+        model.addAttribute("checkoutRequest", checkoutRequest);
 
         return "user/order/checkout";
     }
 
-    // Khúc này trong OrderController.java sửa lại như sau để hết sạch lỗi:
+
     @PostMapping("/checkout/process")
     public String processCheckout(@ModelAttribute CheckoutRequest checkoutRequest,
                                   Principal principal,
@@ -60,7 +72,13 @@ public class OrderController {
 
             User currentUser = userService.findByEmail(principal.getName());
 
-            // Trong hàm placeOrder bên trên đã tự động tính toán gán độ ưu tiên (Priority) rồi, không cần gọi lưu thủ công ở đây nữa!
+            currentUser.setFullName(checkoutRequest.getReceiverName());
+            currentUser.setPhone(checkoutRequest.getReceiverPhone());
+            currentUser.setAddress(checkoutRequest.getShippingAddress());
+
+            userService.save(currentUser);
+
+
             Order newOrder = orderService.placeOrder(currentUser, checkoutRequest);
 
             // Phân luồng Thanh Toán
@@ -103,7 +121,6 @@ public class OrderController {
         // 3. NẠP ĐỐI TƯỢNG USER VÀO MODEL (Bước quyết định)
         model.addAttribute("user", user);
 
-        // 4. Lấy danh sách đơn hàng (Code cũ của bạn)
         List<Order> orders = orderService.findByUser(user);
         model.addAttribute("orders", orders);
 
@@ -165,7 +182,7 @@ public class OrderController {
         }
         return "redirect:/admin/orders";
     }
-    // THÊM VÀO CUỐI FILE ORDERCONTROLLER.JAVA CỦA BẠN
+
 
     @PostMapping("/admin/warehouse/submit-export/{orderId}")
     public String submitExportWarehouse(@PathVariable Long orderId,
